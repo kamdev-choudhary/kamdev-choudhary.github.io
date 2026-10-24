@@ -35,11 +35,13 @@ no server at runtime.
   should be added. Every component is `.astro`; interactive behaviour lives in
   `<script>` blocks. The home page ships roughly 12kB of gzipped JavaScript and
   that is the point — check the payload before adding a dependency.
-- **No backend.** The contact form posts to a Google Apps Script web app, which
-  files each enquiry in a Google Sheet and emails a copy. See
-  `scripts/contact-apps-script.gs`. The request deliberately sends
-  `Content-Type: text/plain` so it stays a CORS "simple request" — Apps Script
-  cannot answer a preflight. Changing that header breaks the form.
+- **No backend.** The contact form submits to Web3Forms, which relays each
+  enquiry to the inbox its access key is bound to. The key in `src/lib/site.ts`
+  is committed on purpose — Web3Forms keys are public by design. The `<form>`
+  keeps a real `action` so it works with JavaScript disabled; the script only
+  intercepts to `fetch` and render inline status. The key is optional: with
+  none set the form sits inside a disabled `<fieldset>` and no submit handler
+  is attached, so there is never a send button that goes nowhere.
 - **One icon dependency.** `lucide-static` SVGs are inlined at build time
   through `src/components/Icon.astro`. Lucide ships no brand marks, so GitHub
   and LinkedIn are vendored in `src/components/icons/`. Do not add further icon
@@ -53,7 +55,6 @@ src/components/  .astro components; sections/ holds one file per page section
 src/layouts/     document shell: head, metadata, theme script, reveal observer
 src/pages/       index, resume, robots.txt
 src/styles/      global.css — design tokens and the whole stylesheet
-scripts/         the Apps Script source (not part of the site build)
 ```
 
 `src/data/stats.ts` derives its figures from the other data files at build

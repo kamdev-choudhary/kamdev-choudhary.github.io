@@ -8,12 +8,19 @@ export const siteUrl = (import.meta.env.SITE ?? "https://kamdev-bharatai.github.
   .replace(/\/+$/, "");
 
 /**
- * Google Apps Script web-app URL that receives contact submissions, appends
- * them to a Google Sheet and emails a copy.
+ * Web3Forms access key. Submissions are relayed to the inbox the key is bound
+ * to, so the site needs no backend of its own.
  *
- * It is a public endpoint, not a credential — it can only append rows and send
- * mail to the owner. When unset, the contact form falls back to a `mailto:`
- * link, so the site still works without any build-time configuration.
+ * This key is public by design — Web3Forms embeds it in client-side markup and
+ * it can only deliver to that one inbox. Rotate it at web3forms.com if it
+ * starts attracting spam.
+ *
+ * Optional: with no key the contact form renders disabled and points visitors
+ * at the email address instead, rather than offering a send that goes nowhere.
  */
-export const contactEndpoint: string =
-  import.meta.env.PUBLIC_CONTACT_ENDPOINT ?? "";
+export const contactAccessKey: string =
+  import.meta.env.PUBLIC_WEB3FORMS_KEY ??
+  "7b7f85d2-251e-4f5d-bbbe-3239bb3447c7";
+
+/** Web3Forms submission endpoint. */
+export const CONTACT_ACTION = "https://api.web3forms.com/submit";

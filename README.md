@@ -20,23 +20,27 @@ Node 22 or newer.
 
 ## Contact form
 
-GitHub Pages has no backend, so the form posts to a **Google Apps Script web
-app** which appends each enquiry to a Google Sheet and emails a copy. Setup
-instructions are in the header of [`scripts/contact-apps-script.gs`](scripts/contact-apps-script.gs).
+GitHub Pages has no backend, so the form submits to
+[Web3Forms](https://web3forms.com), which relays each enquiry to the inbox its
+access key is bound to.
 
-Once deployed, expose the script's `/exec` URL to the build:
+The key lives in [`src/lib/site.ts`](src/lib/site.ts) and is committed
+deliberately: Web3Forms keys are public by design — they sit in client-side
+markup and can only deliver to that one inbox. Rotate it at web3forms.com if it
+starts attracting spam. To override it per environment, set
+`PUBLIC_WEB3FORMS_KEY` (see `.env.example`).
 
-| Where | How |
-| --- | --- |
-| Local | `PUBLIC_CONTACT_ENDPOINT` in `.env` (see `.env.example`) |
-| CI | Repository **variable** `PUBLIC_CONTACT_ENDPOINT` |
+Two details worth keeping:
 
-It is a repository *variable*, not a secret — the URL is inlined into the
-public bundle regardless, and the endpoint can only append rows and email the
-owner.
+- The `<form>` has a real `action`, so it still submits with JavaScript
+  disabled. The script intercepts it only to submit via `fetch` and show
+  inline status.
+- A hidden `botcheck` field is Web3Forms' own honeypot; anything that fills it
+  is discarded.
 
-If the variable is unset the form still validates, then falls back to opening
-the visitor's mail client. The site is never broken by a missing endpoint.
+The key is **optional**. With none set, the form renders inside a disabled
+`<fieldset>` with a direct email link in its place — the site never shows a
+send button that quietly goes nowhere.
 
 ## Deploying
 
@@ -48,7 +52,6 @@ One-time setup:
 2. The site is configured as a **user site**, so the repository must be named
    `kamdev-bharatai.github.io`. If you keep a different repository name, set
    `base` and `site` in `astro.config.mjs` to match the project-page URL.
-3. Add the `PUBLIC_CONTACT_ENDPOINT` variable described above.
 
 ## Editing content
 
