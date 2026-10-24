@@ -1,7 +1,7 @@
 ---
 import { getImage } from "astro:assets";
 import photo from "@/assets/photo.jpg";
-import { siteUrl } from "@/lib/site";
+import { googleSiteVerification, siteUrl } from "@/lib/site";
 import { profile } from "@/data/profile";
 import "@/styles/global.css";
 
@@ -60,6 +60,11 @@ const ogImageUrl = new URL(ogImage.src, siteUrl).href;
       content="Kamdev Choudhary, MERN developer, React developer, Next.js, Node.js, TypeScript, portfolio, Noida"
     />
     <meta name="robots" content="index, follow" />
+    {
+      googleSiteVerification && (
+        <meta name="google-site-verification" content={googleSiteVerification} />
+      )
+    }
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fbfbfe" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d0e14" />
 

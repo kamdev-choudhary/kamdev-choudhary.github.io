@@ -21,5 +21,14 @@ export const siteUrl = (
  */
 export const contactAccessKey: string = "7b7f85d2-251e-4f5d-bbbe-3239bb3447c7";
 
+/**
+ * Google Search Console ownership token.
+ *
+ * Needed to verify the site so the Security Issues report is readable and a
+ * Safe Browsing review can be requested. Public by design — it only proves
+ * ownership and grants nothing.
+ */
+export const googleSiteVerification = "vbC2ch_06wZUSzFYEtBr2V2K26mZIK0VMzpKFBRGr9I";
+
 /** Web3Forms submission endpoint. */
 export const CONTACT_ACTION = "https://api.web3forms.com/submit";
