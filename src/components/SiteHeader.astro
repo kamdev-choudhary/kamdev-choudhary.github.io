@@ -1,0 +1,661 @@
+---
+import { Dialog } from "@starwind-ui/astro/dialog";
+import { Drawer } from "@starwind-ui/astro/drawer";
+import Container from "@/components/Container.astro";
+import Icon from "@/components/Icon.astro";
+import BrandGithub from "@/components/icons/BrandGithub.astro";
+import BrandLinkedin from "@/components/icons/BrandLinkedin.astro";
+import { buttonClass } from "@/lib/button";
+import { contact, navigation, profile } from "@/data/profile";
+
+/** Only the sections most visitors want sit in the bar; ⌘K reaches the rest. */
+const primaryNav = navigation.filter((item) => item.primary);
+
+/** Everything the command palette can jump to or open. */
+const paletteGroups = [
+  {
+    heading: "Navigate",
+    items: [
+      ...navigation.map((item) => ({
+        label: item.label,
+        hint: item.cmd,
+        keywords: `${item.label} ${item.cmd}`,
+        action: "scroll",
+        target: item.id,
+        icon: "arrow-right",
+      })),
+      {
+        label: "Resume",
+        hint: "/resume",
+        keywords: "resume cv download print",
+        action: "navigate",
+        target: "/resume",
+        icon: "file-text",
+      },
+    ],
+  },
+  {
+    heading: "Connect",
+    items: [
+      {
+        label: "Email",
+        hint: contact.email,
+        keywords: "email mail contact",
+        action: "navigate",
+        target: `mailto:${contact.email}`,
+        icon: "mail",
+      },
+      {
+        label: "Phone",
+        hint: contact.phone,
+        keywords: "phone call mobile",
+        action: "navigate",
+        target: contact.phoneHref,
+        icon: "phone",
+      },
+      {
+        label: "GitHub",
+        hint: contact.githubLabel,
+        keywords: "github code repositories source",
+        action: "external",
+        target: contact.github,
+        icon: "brand-github",
+      },
+      {
+        label: "LinkedIn",
+        hint: contact.linkedinLabel,
+        keywords: "linkedin profile network",
+        action: "external",
+        target: contact.linkedin,
+        icon: "brand-linkedin",
+      },
+    ],
+  },
+  {
+    heading: "Theme",
+    items: [
+      {
+        label: "Light mode",
+        hint: "",
+        keywords: "light theme mode bright",
+        action: "theme",
+        target: "light",
+        icon: "sun",
+      },
+      {
+        label: "Dark mode",
+        hint: "",
+        keywords: "dark theme mode night",
+        action: "theme",
+        target: "dark",
+        icon: "moon",
+      },
+    ],
+  },
+] as const;
+
+const SHORTCUTS = [
+  { keys: ["j"], label: "next section" },
+  { keys: ["k"], label: "previous section" },
+  { keys: ["g", "g"], label: "jump to top" },
+  { keys: ["G"], label: "jump to bottom" },
+  { keys: ["/"], label: "search (command palette)" },
+  { keys: ["⌘", "K"], label: "command palette" },
+  { keys: ["t"], label: "toggle theme" },
+  { keys: ["r"], label: "open resume" },
+  { keys: ["?"], label: "this help" },
+  { keys: ["Esc"], label: "close" },
+];
+
+const POPUP_BASE =
+  "m-0 max-h-[85dvh] w-full border bg-popover text-popover-foreground shadow-2xl " +
+  "backdrop:bg-black/50 backdrop:backdrop-blur-sm open:flex open:flex-col";
+---
+
+<header
+  data-site-header
+  class="no-print sticky top-0 z-50 w-full border-b border-transparent bg-background transition-colors duration-200"
+>
+  <Container class="flex h-14 items-center gap-3">
+    <a
+      href="/"
+      class="shrink-0 text-sm font-semibold tracking-tight text-primary"
+      aria-label={`${profile.name} — home`}
+    >
+      {profile.handle}
+    </a>
+
+    {/* primary nav — an underline marks the active section */}
+    <nav aria-label="Sections" class="hidden items-center gap-1 md:flex">
+      {
+        primaryNav.map((item) => (
+          <a
+            href={`#${item.id}`}
+            data-nav-link={item.id}
+            class="relative rounded-md px-2.5 py-1.5 text-sm text-muted-foreground capitalize transition-colors hover:text-foreground after:absolute after:inset-x-2.5 after:-bottom-px after:h-px after:origin-left after:scale-x-0 after:bg-primary after:transition-transform aria-[current=true]:text-primary aria-[current=true]:after:scale-x-100"
+          >
+            {item.short}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="ml-auto flex items-center gap-1">
+      {/* search: the real entry point to everything else */}
+      <Dialog.Root id="command-palette" class="contents">
+        <Dialog.Trigger
+          aria-label="Open command palette"
+          class={buttonClass({
+            variant: "ghost",
+            size: "sm",
+            class: "h-9 gap-2 px-2.5 text-xs text-muted-foreground",
+          })}
+        >
+          <Icon name="search" class="size-4" />
+          <kbd
+            class="pointer-events-none hidden items-center rounded border bg-muted px-1.5 py-0.5 font-mono text-[10px] font-medium select-none lg:inline-flex"
+          >
+            ⌘K
+          </kbd>
+        </Dialog.Trigger>
+
+        <Dialog.Popup
+          aria-label="Command palette"
+          class={`${POPUP_BASE} fixed top-[12vh] left-1/2 max-w-lg -translate-x-1/2 rounded-xl p-0`}
+        >
+          <div class="flex items-center gap-2.5 border-b px-4">
+            <Icon name="search" class="size-4 shrink-0 text-muted-foreground" />
+            <input
+              type="text"
+              data-palette-input
+              placeholder="Type a command or search…"
+              aria-label="Search commands"
+              autocomplete="off"
+              class="h-12 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            />
+          </div>
+
+          <div data-palette-list class="min-h-0 flex-1 overflow-y-auto p-2">
+            {
+              paletteGroups.map((group) => (
+                <div data-palette-group>
+                  <p class="px-2 py-1.5 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                    {group.heading}
+                  </p>
+                  <ul>
+                    {group.items.map((item) => (
+                      <li>
+                        <button
+                          type="button"
+                          data-palette-item
+                          data-keywords={item.keywords.toLowerCase()}
+                          data-action={item.action}
+                          data-target={item.target}
+                          class="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-sm transition-colors data-[active]:bg-accent data-[active]:text-accent-foreground"
+                        >
+                          {item.icon === "brand-github" ? (
+                            <BrandGithub class="size-4 shrink-0 text-muted-foreground" />
+                          ) : item.icon === "brand-linkedin" ? (
+                            <BrandLinkedin class="size-4 shrink-0 text-muted-foreground" />
+                          ) : (
+                            <Icon
+                              name={item.icon}
+                              class="size-4 shrink-0 text-muted-foreground"
+                            />
+                          )}
+                          <span class="min-w-0 flex-1 truncate capitalize">
+                            {item.label}
+                          </span>
+                          {item.hint && (
+                            <span class="hidden shrink-0 font-mono text-[11px] text-muted-foreground sm:block">
+                              {item.hint}
+                            </span>
+                          )}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))
+            }
+            <p
+              data-palette-empty
+              class="hidden px-2 py-6 text-center text-sm text-muted-foreground"
+            >
+              No results found.
+            </p>
+          </div>
+
+          {/* clicked from script once an item is activated */}
+          <Dialog.Close
+            data-palette-close
+            class="hidden"
+            aria-hidden="true"
+            tabindex="-1"
+          />
+        </Dialog.Popup>
+      </Dialog.Root>
+
+      <button
+        type="button"
+        data-theme-toggle
+        aria-label="Toggle colour theme"
+        title="Toggle theme"
+        class={buttonClass({ variant: "ghost", size: "icon" })}
+      >
+        <Icon name="sun" class="size-4 dark:hidden" />
+        <Icon name="moon" class="hidden size-4 dark:block" />
+      </button>
+
+      <a
+        href="/resume"
+        class={buttonClass({
+          variant: "outline",
+          size: "sm",
+          class: "hidden h-9 lg:inline-flex",
+        })}
+      >
+        Resume
+      </a>
+
+      {/* everything folds into the drawer below md */}
+      <Drawer.Root class="contents">
+        <Drawer.Trigger
+          aria-label="Open navigation menu"
+          class={buttonClass({ variant: "ghost", size: "icon", class: "md:hidden" })}
+        >
+          <Icon name="menu" class="size-4" />
+        </Drawer.Trigger>
+
+        <Drawer.Popup
+          aria-label="Navigation"
+          class={`${POPUP_BASE} fixed inset-y-0 right-0 left-auto h-dvh max-h-dvh w-[min(20rem,85vw)] rounded-none`}
+        >
+          <div class="flex items-center justify-between border-b px-4 py-3">
+            <Drawer.Title class="text-sm font-semibold text-primary">
+              {profile.handle}
+            </Drawer.Title>
+            <Drawer.Close
+              aria-label="Close menu"
+              class={buttonClass({ variant: "ghost", size: "icon-sm" })}
+            >
+              <Icon name="x" class="size-4" />
+            </Drawer.Close>
+          </div>
+
+          <nav aria-label="All sections" class="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto p-3">
+            {
+              navigation.map((item) => (
+                <a
+                  href={`#${item.id}`}
+                  data-drawer-link
+                  class="rounded-lg px-3 py-2.5 text-sm capitalize transition-colors hover:bg-accent"
+                >
+                  {item.label}
+                </a>
+              ))
+            }
+
+            <div class="my-3 h-px bg-border"></div>
+
+            <a
+              href="/resume"
+              class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm hover:bg-accent"
+            >
+              <Icon name="file-text" class="size-4 text-muted-foreground" />
+              Resume
+            </a>
+            <a
+              href={`mailto:${contact.email}`}
+              class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm hover:bg-accent"
+            >
+              <Icon name="mail" class="size-4 text-muted-foreground" />
+              Email
+            </a>
+            <a
+              href={contact.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm hover:bg-accent"
+            >
+              <BrandGithub class="size-4 text-muted-foreground" />
+              GitHub
+            </a>
+            <a
+              href={contact.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm hover:bg-accent"
+            >
+              <BrandLinkedin class="size-4 text-muted-foreground" />
+              LinkedIn
+            </a>
+          </nav>
+        </Drawer.Popup>
+      </Drawer.Root>
+    </div>
+  </Container>
+
+  {/* keyboard help, opened with ? */}
+  <Dialog.Root id="keyboard-help" class="contents">
+    <Dialog.Trigger class="hidden" aria-hidden="true" tabindex="-1" />
+    <Dialog.Popup
+      class={`${POPUP_BASE} fixed top-1/2 left-1/2 max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl p-5`}
+    >
+      <Dialog.Title class="text-base font-semibold">Keyboard shortcuts</Dialog.Title>
+      <Dialog.Description class="mt-1 text-xs text-muted-foreground">
+        Vim-style navigation. Ignored while typing.
+      </Dialog.Description>
+      <ul class="mt-4 flex flex-col gap-1.5">
+        {
+          SHORTCUTS.map((shortcut) => (
+            <li class="flex items-center justify-between gap-4 text-sm">
+              <span class="text-muted-foreground">{shortcut.label}</span>
+              <span class="flex shrink-0 gap-1">
+                {shortcut.keys.map((key) => (
+                  <kbd class="inline-flex min-w-6 justify-center rounded border bg-muted px-1.5 py-0.5 font-mono text-[11px]">
+                    {key}
+                  </kbd>
+                ))}
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+    </Dialog.Popup>
+  </Dialog.Root>
+</header>
+
+<script>
+  import { setTheme, syncAcrossTabs, toggleTheme } from "@/lib/theme";
+
+  /* ---------- theme ----------
+     The inline script in the layout already applied the stored choice, so
+     this only has to wire the toggle up. */
+  syncAcrossTabs();
+
+  document.querySelectorAll<HTMLElement>("[data-theme-toggle]").forEach((button) => {
+    button.addEventListener("click", () => toggleTheme());
+  });
+
+  /* ---------- sticky header border ---------- */
+  const header = document.querySelector<HTMLElement>("[data-site-header]");
+  if (header) {
+    const onScroll = () => {
+      const scrolled = window.scrollY > 8;
+      header.classList.toggle("border-transparent", !scrolled);
+      header.classList.toggle("border-b", true);
+      header.classList.toggle("bg-background/80", scrolled);
+      header.classList.toggle("backdrop-blur-md", scrolled);
+      header.classList.toggle("bg-background", !scrolled);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+  }
+
+  /* ---------- active-section underline ---------- */
+  const navLinks = Array.from(
+    document.querySelectorAll<HTMLAnchorElement>("[data-nav-link]"),
+  );
+  const sectionIds = Array.from(document.querySelectorAll<HTMLElement>("section[id]")).map(
+    (section) => section.id,
+  );
+
+  if (navLinks.length > 0 && sectionIds.length > 0) {
+    const setActive = (id: string) => {
+      for (const link of navLinks) {
+        if (link.dataset.navLink === id) link.setAttribute("aria-current", "true");
+        else link.removeAttribute("aria-current");
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort(
+            (a, b) => a.boundingClientRect.top - b.boundingClientRect.top,
+          );
+        if (visible[0]) setActive(visible[0].target.id);
+      },
+      { rootMargin: "-88px 0px -60% 0px", threshold: 0 },
+    );
+
+    for (const id of sectionIds) {
+      const section = document.getElementById(id);
+      if (section) observer.observe(section);
+    }
+  }
+
+  /* ---------- command palette ---------- */
+  const paletteRoot = document.getElementById("command-palette");
+  const paletteInput = paletteRoot?.querySelector<HTMLInputElement>("[data-palette-input]");
+  const paletteItems = Array.from(
+    paletteRoot?.querySelectorAll<HTMLButtonElement>("[data-palette-item]") ?? [],
+  );
+  const paletteGroups = Array.from(
+    paletteRoot?.querySelectorAll<HTMLElement>("[data-palette-group]") ?? [],
+  );
+  const paletteEmpty = paletteRoot?.querySelector<HTMLElement>("[data-palette-empty]");
+
+  const openPalette = () => {
+    paletteRoot?.querySelector<HTMLButtonElement>("[data-sw-dialog-trigger]")?.click();
+  };
+  const closePalette = () => {
+    paletteRoot?.querySelector<HTMLButtonElement>("[data-palette-close]")?.click();
+  };
+
+  /** Items currently passing the filter, in DOM order. */
+  let matches: HTMLButtonElement[] = paletteItems;
+
+  const setActiveItem = (next: number) => {
+    matches.forEach((item, index) => {
+      if (index === next) {
+        item.setAttribute("data-active", "");
+        item.scrollIntoView({ block: "nearest" });
+      } else {
+        item.removeAttribute("data-active");
+      }
+    });
+  };
+
+  const activeIndex = () => matches.findIndex((item) => item.hasAttribute("data-active"));
+
+  const filterPalette = (query: string) => {
+    const needle = query.trim().toLowerCase();
+
+    matches = paletteItems.filter((item) => {
+      const hit = !needle || (item.dataset.keywords ?? "").includes(needle);
+      item.closest("li")?.classList.toggle("hidden", !hit);
+      return hit;
+    });
+
+    // hide a group heading once all of its items are filtered out
+    for (const group of paletteGroups) {
+      const anyVisible = Array.from(
+        group.querySelectorAll<HTMLButtonElement>("[data-palette-item]"),
+      ).some((item) => !item.closest("li")?.classList.contains("hidden"));
+      group.classList.toggle("hidden", !anyVisible);
+    }
+
+    paletteEmpty?.classList.toggle("hidden", matches.length > 0);
+    setActiveItem(matches.length > 0 ? 0 : -1);
+  };
+
+  const runItem = (item: HTMLButtonElement) => {
+    const action = item.dataset.action;
+    const target = item.dataset.target ?? "";
+    closePalette();
+
+    // let the dialog finish closing so focus lands where we send it
+    requestAnimationFrame(() => {
+      if (action === "scroll") {
+        const section = document.getElementById(target);
+        if (section) {
+          section.scrollIntoView({ behavior: "smooth", block: "start" });
+          history.replaceState(null, "", `#${target}`);
+        } else {
+          window.location.href = `/#${target}`;
+        }
+      } else if (action === "navigate") {
+        window.location.href = target;
+      } else if (action === "external") {
+        window.open(target, "_blank", "noopener");
+      } else if (action === "theme") {
+        setTheme(target === "light" ? "light" : "dark");
+      }
+    });
+  };
+
+  if (paletteRoot && paletteInput) {
+    filterPalette("");
+
+    paletteInput.addEventListener("input", () => filterPalette(paletteInput.value));
+
+    paletteInput.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        if (matches.length === 0) return;
+        const current = activeIndex();
+        const delta = event.key === "ArrowDown" ? 1 : -1;
+        const next = (current + delta + matches.length) % matches.length;
+        setActiveItem(next);
+      } else if (event.key === "Enter") {
+        event.preventDefault();
+        const current = matches[activeIndex()];
+        if (current) runItem(current);
+      }
+    });
+
+    for (const item of paletteItems) {
+      item.addEventListener("click", () => runItem(item));
+      item.addEventListener("mousemove", () => {
+        const index = matches.indexOf(item);
+        if (index >= 0) setActiveItem(index);
+      });
+    }
+
+    // focus the input and reset the filter whenever the dialog opens
+    const popup = paletteRoot.querySelector<HTMLElement>("[data-sw-dialog-content]");
+    if (popup) {
+      new MutationObserver(() => {
+        if (popup.dataset.state === "open") {
+          paletteInput.value = "";
+          filterPalette("");
+          paletteInput.focus();
+        }
+      }).observe(popup, { attributes: true, attributeFilter: ["data-state"] });
+    }
+  }
+
+  /* ---------- drawer: close after following a link ---------- */
+  const drawerRoot = document.querySelector<HTMLElement>("[data-sw-drawer]");
+  if (drawerRoot) {
+    for (const link of drawerRoot.querySelectorAll<HTMLAnchorElement>("[data-drawer-link]")) {
+      link.addEventListener("click", () => {
+        drawerRoot.querySelector<HTMLButtonElement>("[data-sw-drawer-close]")?.click();
+      });
+    }
+  }
+
+  /* ---------- vim-style keyboard navigation ---------- */
+  const HEADER_OFFSET = 80;
+
+  /** True when the user is typing, so single-letter bindings must not fire. */
+  const isTyping = (target: EventTarget | null): boolean => {
+    const el = target as HTMLElement | null;
+    if (!el) return false;
+    return (
+      el.tagName === "INPUT" ||
+      el.tagName === "TEXTAREA" ||
+      el.tagName === "SELECT" ||
+      el.isContentEditable
+    );
+  };
+
+  const moveSection = (direction: 1 | -1) => {
+    const sections = sectionIds
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+    if (sections.length === 0) return;
+
+    const tops = sections.map(
+      (section) => section.getBoundingClientRect().top + window.scrollY,
+    );
+    const probe = window.scrollY + HEADER_OFFSET + 8;
+
+    let current = 0;
+    for (let i = 0; i < tops.length; i++) {
+      if (tops[i] <= probe) current = i;
+    }
+
+    const next = Math.min(sections.length - 1, Math.max(0, current + direction));
+    window.scrollTo({
+      top: Math.max(0, tops[next] - HEADER_OFFSET),
+      behavior: "smooth",
+    });
+  };
+
+  let lastKey = { key: "", at: 0 };
+
+  document.addEventListener("keydown", (event) => {
+    // ⌘K / Ctrl+K works even while typing
+    if (event.key.toLowerCase() === "k" && (event.metaKey || event.ctrlKey)) {
+      event.preventDefault();
+      openPalette();
+      return;
+    }
+
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
+    if (isTyping(event.target)) return;
+
+    switch (event.key) {
+      case "j":
+        event.preventDefault();
+        moveSection(1);
+        break;
+      case "k":
+        event.preventDefault();
+        moveSection(-1);
+        break;
+      case "G":
+        event.preventDefault();
+        window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+        break;
+      case "g": {
+        const now = Date.now();
+        if (lastKey.key === "g" && now - lastKey.at < 600) {
+          event.preventDefault();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          lastKey = { key: "", at: 0 };
+          return;
+        }
+        lastKey = { key: "g", at: now };
+        return;
+      }
+      case "/":
+        event.preventDefault();
+        openPalette();
+        break;
+      case "t":
+        event.preventDefault();
+        toggleTheme();
+        break;
+      case "r":
+        event.preventDefault();
+        window.location.href = "/resume";
+        break;
+      case "?":
+        event.preventDefault();
+        document
+          .getElementById("keyboard-help")
+          ?.querySelector<HTMLButtonElement>("[data-sw-dialog-trigger]")
+          ?.click();
+        break;
+      default:
+        return;
+    }
+
+    lastKey = { key: "", at: 0 };
+  });
+</script>

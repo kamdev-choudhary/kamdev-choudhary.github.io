@@ -1,11 +1,78 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import Layout from "@/layouts/Layout.astro";
+import SiteHeader from "@/components/SiteHeader.astro";
+import SiteFooter from "@/components/SiteFooter.astro";
+import Hero from "@/components/sections/Hero.astro";
+import About from "@/components/sections/About.astro";
+import Experience from "@/components/sections/Experience.astro";
+import Projects from "@/components/sections/Projects.astro";
+import Skills from "@/components/sections/Skills.astro";
+import Education from "@/components/sections/Education.astro";
+import Certificates from "@/components/sections/Certificates.astro";
+import Community from "@/components/sections/Community.astro";
+import Contact from "@/components/sections/Contact.astro";
+import { siteUrl } from "@/lib/site";
+import { contact, education, experience, profile } from "@/data/profile";
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+/** JSON-LD so search engines and AI crawlers get structured facts. */
+const [locality, region] = profile.location.split(",").map((part) => part.trim());
+
+const personSchema = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: profile.name,
+  jobTitle: profile.title,
+  email: `mailto:${contact.email}`,
+  telephone: contact.phoneHref.replace("tel:", ""),
+  url: siteUrl,
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: locality,
+    addressRegion: region,
+    addressCountry: "IN",
+  },
+  sameAs: [contact.github, contact.linkedin],
+  worksFor: {
+    "@type": "Organization",
+    name: experience[0].company,
+  },
+  alumniOf: education.map((entry) => ({
+    "@type": "EducationalOrganization",
+    name: entry.institute,
+  })),
+  knowsAbout: [
+    "React",
+    "Next.js",
+    "Astro",
+    "Node.js",
+    "TypeScript",
+    "MongoDB",
+    "Full-Stack Development",
+  ],
+};
 ---
 
 <Layout>
-	<Welcome />
+  <script
+    slot="head"
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify(personSchema)}
+  />
+
+  <SiteHeader />
+
+  <main id="main" class="flex-1">
+    <Hero />
+    <About />
+    <Experience />
+    <Projects />
+    <Skills />
+    <Education />
+    <Certificates />
+    <Community />
+    <Contact />
+  </main>
+
+  <SiteFooter />
 </Layout>

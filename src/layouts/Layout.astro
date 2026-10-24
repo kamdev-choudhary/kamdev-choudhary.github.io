@@ -1,23 +1,107 @@
-<!doctype html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
-	</head>
-	<body>
-		<slot />
-	</body>
-</html>
+---
+import { getImage } from "astro:assets";
+import photo from "@/assets/photo.jpg";
+import { siteUrl } from "@/lib/site";
+import { profile } from "@/data/profile";
+import "@/styles/global.css";
 
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
-</style>
+interface Props {
+  title?: string | undefined;
+  description?: string | undefined;
+  /** Omit the sitewide name suffix — used by the home page, which carries it already. */
+  bareTitle?: boolean | undefined;
+}
+
+const {
+  title,
+  description = `${profile.title} based in ${profile.location}. ${profile.tagline}`,
+  bareTitle = false,
+} = Astro.props;
+
+const pageTitle = !title
+  ? `${profile.name} — ${profile.title}`
+  : bareTitle
+    ? title
+    : `${title} — ${profile.name}`;
+
+const canonical = new URL(Astro.url.pathname, siteUrl).href.replace(/\/$/, "") || siteUrl;
+
+/**
+ * Social card. Cropping the portrait to the 1.91:1 ratio social platforms
+ * expect keeps this a build-time image transform — no canvas, no headless
+ * browser and no second rendering stack just for one PNG.
+ */
+const ogImage = await getImage({
+  src: photo,
+  width: 1200,
+  height: 630,
+  fit: "cover",
+  position: "top",
+  format: "jpeg",
+  quality: 80,
+});
+const ogImageUrl = new URL(ogImage.src, siteUrl).href;
+---
+
+<!doctype html>
+<html lang="en" class="h-full antialiased">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <meta name="author" content={profile.name} />
+    <meta
+      name="keywords"
+      content="Kamdev Choudhary, MERN developer, React developer, Next.js, Node.js, TypeScript, portfolio, Noida"
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fbfbfe" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d0e14" />
+
+    <meta property="og:type" content="profile" />
+    <meta property="og:locale" content="en_IN" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={`${profile.name} — Portfolio`} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${profile.name} — ${profile.title}`} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    {/* Applies the stored theme before first paint, so there is no flash.
+        `is:inline` keeps it un-bundled and blocking, which is the point.
+        The storage key must stay in step with lib/theme.ts. */}
+    <script is:inline>
+      (() => {
+        try {
+          const stored = localStorage.getItem("theme");
+          document.documentElement.classList.toggle("dark", stored !== "light");
+        } catch {
+          document.documentElement.classList.add("dark");
+        }
+      })();
+    </script>
+
+    <slot name="head" />
+  </head>
+  <body class="flex min-h-full flex-col">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-sm focus:text-primary-foreground"
+    >
+      Skip to content
+    </a>
+    <slot />
+  </body>
+</html>

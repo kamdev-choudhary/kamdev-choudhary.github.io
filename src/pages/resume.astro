@@ -1,0 +1,295 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Container from "@/components/Container.astro";
+import Icon from "@/components/Icon.astro";
+import BrandGithub from "@/components/icons/BrandGithub.astro";
+import BrandLinkedin from "@/components/icons/BrandLinkedin.astro";
+import { buttonClass } from "@/lib/button";
+import {
+  certificates,
+  contact,
+  education,
+  experience,
+  extracurricular,
+  profile,
+  skills,
+} from "@/data/profile";
+
+const positions = experience.flatMap((job) =>
+  job.positions.map((position) => ({ company: job.company, position })),
+);
+---
+
+<Layout title="Resume" description={`Resume of ${profile.name} — ${profile.title}.`}>
+  {/* toolbar — hidden when printing */}
+  <header
+    class="no-print sticky top-0 z-50 border-b bg-background/85 backdrop-blur-md"
+  >
+    <Container class="flex h-14 items-center justify-between gap-3">
+      <a href="/" class={buttonClass({ variant: "ghost", size: "sm" })}>
+        <Icon name="arrow-left" class="size-3.5" />
+        Back
+      </a>
+
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          data-print
+          class={buttonClass({ variant: "outline", size: "sm" })}
+        >
+          <Icon name="printer" class="size-3.5" />
+          <span class="hidden sm:inline">Print</span>
+        </button>
+        <button
+          type="button"
+          data-download-pdf
+          class={buttonClass({ size: "sm" })}
+        >
+          <Icon name="download" class="size-3.5" data-download-idle />
+          <Icon
+            name="loader-circle"
+            class="hidden size-3.5 animate-spin"
+            data-download-busy
+          />
+          Download PDF
+        </button>
+      </div>
+    </Container>
+  </header>
+
+  <main id="main" class="flex-1 py-8 print:py-0 sm:py-12">
+    <Container class="max-w-3xl print:max-w-none print:px-0">
+      <article class="space-y-7">
+        <header class="border-b pb-5">
+          <h1 class="text-2xl font-semibold tracking-tight sm:text-3xl">
+            {profile.name}
+          </h1>
+          <p class="mt-1 text-sm text-primary sm:text-base">{profile.title}</p>
+
+          <ul
+            class="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-muted-foreground print:text-black"
+          >
+            <li class="flex items-center gap-1.5">
+              <Icon name="mail" class="size-3.5 shrink-0" />
+              <a href={`mailto:${contact.email}`}>{contact.email}</a>
+            </li>
+            <li class="flex items-center gap-1.5">
+              <Icon name="phone" class="size-3.5 shrink-0" />
+              <a href={contact.phoneHref}>{contact.phone}</a>
+            </li>
+            <li class="flex items-center gap-1.5">
+              <BrandGithub class="size-3.5 shrink-0" />
+              <a href={contact.github}>{contact.githubLabel}</a>
+            </li>
+            <li class="flex items-center gap-1.5">
+              <BrandLinkedin class="size-3.5 shrink-0" />
+              <a href={contact.linkedin}>{contact.linkedinLabel}</a>
+            </li>
+            <li class="flex items-center gap-1.5">
+              <Icon name="map-pin" class="size-3.5 shrink-0" />
+              {profile.location}
+            </li>
+          </ul>
+        </header>
+
+        <section class="print-break">
+          <h2
+            class="mb-3 border-b pb-1.5 text-xs font-bold tracking-widest text-primary uppercase print:text-black"
+          >
+            Summary
+          </h2>
+          <p class="text-sm leading-relaxed text-pretty">
+            {profile.about[0]} {profile.about[1]}
+          </p>
+        </section>
+
+        <section class="print-break">
+          <h2
+            class="mb-3 border-b pb-1.5 text-xs font-bold tracking-widest text-primary uppercase print:text-black"
+          >
+            Experience
+          </h2>
+          <div class="space-y-5">
+            {
+              positions.map(({ company, position }) => (
+                <div class="print-break">
+                  <div class="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+                    <h3 class="text-sm font-semibold">
+                      {position.role}{" "}
+                      <span class="font-normal text-muted-foreground print:text-black">
+                        — {company}
+                      </span>
+                    </h3>
+                    <p class="shrink-0 text-xs text-muted-foreground print:text-black">
+                      {position.start} — {position.end} · {position.location}
+                    </p>
+                  </div>
+                  <ul class="mt-2 space-y-1">
+                    {position.highlights.map((highlight) => (
+                      <li class="flex gap-2 text-sm leading-relaxed text-pretty">
+                        <span aria-hidden="true">•</span>
+                        {highlight}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))
+            }
+          </div>
+        </section>
+
+        <section class="print-break">
+          <h2
+            class="mb-3 border-b pb-1.5 text-xs font-bold tracking-widest text-primary uppercase print:text-black"
+          >
+            Skills
+          </h2>
+          <dl class="space-y-1.5">
+            {
+              skills.map((group) => (
+                <div class="flex flex-col gap-0.5 sm:flex-row sm:gap-2">
+                  <dt class="shrink-0 text-xs font-semibold capitalize sm:w-40">
+                    {group.label}
+                  </dt>
+                  <dd class="text-sm">{group.items.join(" · ")}</dd>
+                </div>
+              ))
+            }
+          </dl>
+        </section>
+
+        <section class="print-break">
+          <h2
+            class="mb-3 border-b pb-1.5 text-xs font-bold tracking-widest text-primary uppercase print:text-black"
+          >
+            Education
+          </h2>
+          <div class="space-y-2">
+            {
+              education.map((entry) => (
+                <div class="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+                  <p class="text-sm">
+                    <span class="font-semibold">{entry.level}</span>
+                    {entry.stream ? ` — ${entry.stream}` : ""} · {entry.institute}
+                  </p>
+                  <p class="shrink-0 text-xs text-muted-foreground print:text-black">
+                    {entry.year} · {entry.grade}
+                  </p>
+                </div>
+              ))
+            }
+          </div>
+        </section>
+
+        <section class="print-break">
+          <h2
+            class="mb-3 border-b pb-1.5 text-xs font-bold tracking-widest text-primary uppercase print:text-black"
+          >
+            Certifications
+          </h2>
+          <ul class="space-y-1">
+            {
+              certificates.map((certificate) => (
+                <li class="flex flex-col gap-0.5 text-sm sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+                  <span>
+                    <span class="font-semibold">{certificate.name}</span> ·{" "}
+                    {certificate.institute}
+                  </span>
+                  <span class="shrink-0 text-xs text-muted-foreground print:text-black">
+                    {certificate.period}
+                  </span>
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+
+        <section class="print-break">
+          <h2
+            class="mb-3 border-b pb-1.5 text-xs font-bold tracking-widest text-primary uppercase print:text-black"
+          >
+            Community
+          </h2>
+          <ul class="space-y-1">
+            {
+              extracurricular.map((entry) => (
+                <li class="text-sm text-pretty">
+                  <span class="font-semibold">{entry.name}</span> ({entry.period}) —{" "}
+                  {entry.achievements[0]}
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+      </article>
+    </Container>
+  </main>
+</Layout>
+
+<script>
+  document.querySelector<HTMLButtonElement>("[data-print]")?.addEventListener("click", () => {
+    window.print();
+  });
+
+  const button = document.querySelector<HTMLButtonElement>("[data-download-pdf]");
+  if (button) {
+    const idle = button.querySelector<HTMLElement>("[data-download-idle]");
+    const busy = button.querySelector<HTMLElement>("[data-download-busy]");
+
+    type PdfModule = typeof import("@/lib/resume-pdf");
+
+    let loading: Promise<PdfModule> | null = null;
+    let loaded: PdfModule | null = null;
+
+    /**
+     * Warms the jsPDF chunk ahead of the click.
+     *
+     * The click handler must never be the thing that waits on a dynamic
+     * import — Safari drops the user activation that lets the download
+     * proceed. Pre-loading here means the handler finds the module already
+     * resolved.
+     */
+    const warm = (): Promise<PdfModule> => {
+      loading ??= import("@/lib/resume-pdf").then((module) => {
+        loaded = module;
+        void module.preloadPdfEngine();
+        return module;
+      });
+      return loading;
+    };
+
+    // jsPDF is ~390kB, so hold off briefly rather than competing with the
+    // page's own render, and warm eagerly on any hint of intent.
+    window.setTimeout(() => void warm(), 1200);
+    button.addEventListener("pointerenter", () => void warm());
+    button.addEventListener("focus", () => void warm());
+
+    const setBusy = (value: boolean) => {
+      button.disabled = value;
+      idle?.classList.toggle("hidden", value);
+      busy?.classList.toggle("hidden", !value);
+    };
+
+    button.addEventListener("click", async () => {
+      setBusy(true);
+      try {
+        const module = loaded ?? (await warm());
+        const blob = await module.buildResumeBlob();
+        const filename = module.resumeFilename();
+
+        if (!module.saveBlob(blob, filename)) {
+          // iOS Safari ignores the download attribute — open it instead.
+          const url = URL.createObjectURL(blob);
+          if (!window.open(url, "_blank", "noopener")) {
+            window.print();
+          }
+        }
+      } catch (error) {
+        console.error("Resume PDF failed:", error);
+        window.print();
+      } finally {
+        setBusy(false);
+      }
+    });
+  }
+</script>
