@@ -11,7 +11,7 @@ const { id, class: className } = Astro.props;
 ---
 
 <section id={id} class={cn("scroll-mt-22 py-13 sm:py-16 lg:py-20", className)}>
-  <Container class="reveal">
+  <Container>
     <slot />
   </Container>
 </section>

@@ -21,7 +21,7 @@ const MAX_BADGES = 5;
 
   <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
     {
-      projects.map((project) => {
+      projects.map((project, index) => {
         const extra = project.tech.length - MAX_BADGES;
         const details = [
           { title: "what I built", items: project.highlights },
@@ -29,7 +29,10 @@ const MAX_BADGES = 5;
         ].filter((group) => group.items.length > 0);
 
         return (
-          <article class="group flex flex-col overflow-hidden rounded-xl border bg-card transition-colors hover:border-primary/40 print-break">
+          <article
+            class="reveal raised group flex flex-col overflow-hidden rounded-xl border bg-card transition-[border-color,transform] duration-300 hover:-translate-y-0.5 hover:border-primary/40 print-break"
+            style={`--reveal-delay: ${index * 70}ms`}
+          >
             {project.image && (
               <div class="relative aspect-16/9 w-full overflow-hidden bg-muted">
                 <Image

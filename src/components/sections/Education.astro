@@ -14,13 +14,16 @@ import { education } from "@/data/profile";
 
   <div class="grid gap-4 md:grid-cols-3 md:gap-5">
     {
-      education.map((entry) => (
-        <article class="flex flex-col rounded-xl border bg-card p-5 transition-colors hover:border-primary/40 print-break">
+      education.map((entry, index) => (
+        <article
+          class="reveal raised flex flex-col rounded-xl border bg-card p-5 transition-colors hover:border-primary/40 print-break"
+          style={`--reveal-delay: ${index * 80}ms`}
+        >
           <div class="mb-3 flex items-start justify-between gap-3">
             <span class="flex size-9 shrink-0 items-center justify-center rounded-md border bg-muted/50">
               <Icon name="graduation-cap" class="size-4 text-primary" />
             </span>
-            <Badge variant="outline">{entry.year}</Badge>
+            <Badge variant="outline" class="figure">{entry.year}</Badge>
           </div>
 
           <h3 class="text-base font-semibold text-balance">{entry.level}</h3>
@@ -36,7 +39,7 @@ import { education } from "@/data/profile";
 
           <p class="mt-auto pt-4 text-sm">
             <span class="text-muted-foreground">{entry.gradeSystem}: </span>
-            <span class="font-semibold text-primary">{entry.grade}</span>
+            <span class="figure font-semibold text-data">{entry.grade}</span>
           </p>
         </article>
       ))

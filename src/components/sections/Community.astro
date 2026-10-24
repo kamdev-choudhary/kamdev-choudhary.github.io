@@ -25,8 +25,11 @@ const HOBBY_ICONS: Record<string, string> = {
     {/* volunteering */}
     <div class="space-y-5 lg:col-span-2">
       {
-        extracurricular.map((entry) => (
-          <article class="rounded-xl border bg-card p-5 transition-colors hover:border-primary/40 print-break sm:p-6">
+        extracurricular.map((entry, index) => (
+          <article
+            class="reveal raised rounded-xl border bg-card p-5 transition-colors hover:border-primary/40 print-break sm:p-6"
+            style={`--reveal-delay: ${index * 90}ms`}
+          >
             <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
               <h3 class="flex items-center gap-2.5 text-base font-semibold tracking-tight text-balance sm:text-lg">
                 <span class="flex size-8 shrink-0 items-center justify-center rounded-md border bg-muted/50">
@@ -34,7 +37,7 @@ const HOBBY_ICONS: Record<string, string> = {
                 </span>
                 {entry.name}
               </h3>
-              <Badge variant="outline" class="w-fit">
+              <Badge variant="outline" class="figure w-fit">
                 {entry.period}
               </Badge>
             </div>
@@ -60,7 +63,7 @@ const HOBBY_ICONS: Record<string, string> = {
     </div>
 
     {/* hobbies */}
-    <div class="rounded-xl border bg-card p-5 sm:p-6 lg:sticky lg:top-24 lg:self-start">
+    <div class="reveal raised rounded-xl border bg-card p-5 sm:p-6 lg:sticky lg:top-24 lg:self-start">
       <p class="text-sm font-semibold">Hobbies</p>
       <ul class="mt-4 space-y-4">
         {

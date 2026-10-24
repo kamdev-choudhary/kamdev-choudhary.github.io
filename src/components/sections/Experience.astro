@@ -4,7 +4,10 @@ import SectionHeading from "@/components/SectionHeading.astro";
 import Badge from "@/components/Badge.astro";
 import { experience } from "@/data/profile";
 
-/** A quiet two-column list: hairlines, no cards, no timeline dots. */
+/**
+ * A timeline, drawn as a route: one line down the gutter, a stop per role.
+ * The content genuinely is a sequence, which is what earns the markers.
+ */
 const positions = experience.flatMap((job) =>
   job.positions.map((position) => ({ company: job.company, position })),
 );
@@ -13,45 +16,62 @@ const positions = experience.flatMap((job) =>
 <Section id="experience" class="border-t">
   <SectionHeading title="Experience" description="Roles, most recent first." />
 
-  <div class="divide-y border-t">
-    {
-      positions.map(({ company, position }) => (
-        <article class="grid gap-4 py-8 sm:grid-cols-[11rem_minmax(0,1fr)] sm:gap-10 lg:grid-cols-[13rem_minmax(0,1fr)]">
-          <div class="sm:pt-0.5">
-            <p class="text-sm text-muted-foreground tabular-nums">
-              {position.start} — {position.end}
-            </p>
-            {position.current && (
-              <Badge variant="secondary" class="mt-2">
-                Current
-              </Badge>
-            )}
-          </div>
+  <div class="relative sm:pl-6">
+    {/* the line itself, fading out at the oldest end */}
+    <span
+      class="absolute top-3 bottom-6 left-[3.5px] hidden w-px bg-gradient-to-b from-border via-border to-transparent sm:block"
+      aria-hidden="true"
+    ></span>
 
-          <div class="min-w-0">
-            <h3 class="text-lg font-semibold tracking-tight">{position.role}</h3>
-            <p class="mt-0.5 text-sm text-muted-foreground">
-              {company} · {position.location}
-            </p>
+    <div class="divide-y border-t">
+      {
+        positions.map(({ company, position }) => (
+          <article class="reveal relative grid gap-4 py-8 sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-10 lg:grid-cols-[12rem_minmax(0,1fr)]">
+            {/* a filled stop marks where the route is now */}
+            <span
+              class:list={[
+                "absolute top-9 -left-6 hidden size-2 rounded-full ring-3 ring-background sm:block",
+                position.current ? "bg-primary" : "bg-border",
+              ]}
+              aria-hidden="true"
+            />
 
-            <ul class="mt-4 space-y-2.5">
-              {position.highlights.map((highlight) => (
-                <li class="relative pl-5 text-sm leading-relaxed text-muted-foreground text-pretty before:absolute before:top-[0.6em] before:left-0 before:size-1 before:rounded-full before:bg-muted-foreground/50">
-                  {highlight}
-                </li>
-              ))}
-            </ul>
+            <div class="sm:pt-0.5">
+              <p class="figure text-sm text-muted-foreground">
+                {position.start} — {position.end}
+              </p>
+              {position.current && (
+                <Badge variant="secondary" class="mt-2">
+                  Current
+                </Badge>
+              )}
+            </div>
 
-            <ul class="mt-5 flex flex-wrap gap-1.5">
-              {position.skills.map((skill) => (
-                <li>
-                  <Badge variant="outline">{skill}</Badge>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </article>
-      ))
-    }
+            <div class="min-w-0">
+              <h3 class="text-lg font-semibold tracking-tight">{position.role}</h3>
+              <p class="mt-0.5 text-sm text-muted-foreground">
+                {company} · {position.location}
+              </p>
+
+              <ul class="mt-4 space-y-2.5">
+                {position.highlights.map((highlight) => (
+                  <li class="relative pl-5 text-sm leading-relaxed text-muted-foreground text-pretty before:absolute before:top-[0.6em] before:left-0 before:h-px before:w-2.5 before:bg-muted-foreground/40">
+                    {highlight}
+                  </li>
+                ))}
+              </ul>
+
+              <ul class="mt-5 flex flex-wrap gap-1.5">
+                {position.skills.map((skill) => (
+                  <li>
+                    <Badge variant="outline">{skill}</Badge>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </article>
+        ))
+      }
+    </div>
   </div>
 </Section>

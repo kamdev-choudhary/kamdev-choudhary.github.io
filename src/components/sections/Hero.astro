@@ -8,22 +8,33 @@ import photo from "@/assets/photo.jpg";
 import { buttonClass } from "@/lib/button";
 import { contact, experience, profile } from "@/data/profile";
 
-/** Typography-led: name -> what I do -> where I do it. Nothing else competes. */
 const current = experience[0];
 
-const SOCIALS = [
-  { href: contact.github, label: "GitHub", icon: "github" },
-  { href: contact.linkedin, label: "LinkedIn", icon: "linkedin" },
-] as const;
+/**
+ * The career as a route: oldest stop first, so the line reads left to right
+ * and ends on the current role. `experience` is stored newest-first.
+ *
+ * The line deliberately runs past the last stop — the path is still going.
+ */
+const stops = [...experience].reverse().map((job) => ({
+  company: job.company.split(/[\s,]+/)[0],
+  year: job.period.split("—")[0].trim().split(/\s+/).pop() ?? "",
+}));
 ---
 
-<section class="border-b">
-  <Container class="py-14 sm:py-20 lg:py-24">
+<section class="relative overflow-hidden border-b">
+  {/* planning-grid backdrop, masked so it dissolves into the page */}
+  <div class="plan-grid pointer-events-none absolute inset-0" aria-hidden="true"></div>
+
+  <Container class="relative py-14 sm:py-20 lg:py-24">
     <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-16">
       <div class="min-w-0 max-w-2xl">
         {
           profile.available && (
-            <p class="flex items-center gap-2.5 text-sm text-muted-foreground">
+            <p
+              class="hero-step flex items-center gap-2.5 text-sm text-muted-foreground"
+              style="--step-delay: 60ms"
+            >
               <span class="relative flex size-1.5">
                 <span class="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-70" />
                 <span class="relative inline-flex size-1.5 rounded-full bg-primary" />
@@ -34,33 +45,91 @@ const SOCIALS = [
         }
 
         <h1
-          class="mt-6 text-[2.75rem] leading-[1.03] font-semibold tracking-[-0.03em] text-balance sm:text-6xl lg:text-7xl"
+          class="hero-step mt-6 text-[2.75rem] leading-[1.03] font-semibold tracking-[-0.035em] text-balance sm:text-6xl lg:text-7xl"
+          style="--step-delay: 160ms"
         >
           {profile.name}
         </h1>
 
-        <p class="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground text-pretty sm:text-xl">
+        <p
+          class="hero-step mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground text-pretty sm:text-xl"
+          style="--step-delay: 280ms"
+        >
           {profile.title} at <span class="text-foreground">{current.company}</span>,
           building AI-powered web and mobile products — with a background in
           education technology.
         </p>
 
-        <dl class="mt-9 grid grid-cols-2 gap-x-8 gap-y-5 border-t pt-7 sm:max-w-md">
-          <div>
-            <dt class="text-xs tracking-wide text-muted-foreground uppercase">
-              Based in
-            </dt>
-            <dd class="mt-1 text-sm">{profile.location}</dd>
-          </div>
-          <div>
-            <dt class="text-xs tracking-wide text-muted-foreground uppercase">
-              Focus
-            </dt>
-            <dd class="mt-1 text-sm">Full-stack · AI · Mobile</dd>
-          </div>
-        </dl>
+        <p
+          class="hero-step mt-3 text-sm text-muted-foreground"
+          style="--step-delay: 340ms"
+        >
+          {profile.location}
+        </p>
 
-        <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+        {/* the route: where the work has been */}
+        <figure class="hero-step mt-10 sm:max-w-md" style="--step-delay: 420ms">
+          <figcaption class="sr-only">Career path by year</figcaption>
+
+          <div class="relative">
+            <svg
+              class="absolute inset-x-0 top-[5px] h-px w-full overflow-visible text-border"
+              viewBox="0 0 100 1"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <defs>
+                <linearGradient id="route-fade" x1="0" x2="1" y1="0" y2="0">
+                  <stop offset="0%" stop-color="currentColor" />
+                  <stop offset="72%" stop-color="currentColor" />
+                  <stop offset="100%" stop-color="currentColor" stop-opacity="0" />
+                </linearGradient>
+              </defs>
+              <line
+                class="route-draw"
+                x1="0"
+                y1="0.5"
+                x2="100"
+                y2="0.5"
+                stroke="url(#route-fade)"
+                stroke-width="1"
+                vector-effect="non-scaling-stroke"
+                pathLength="1"
+              />
+            </svg>
+
+            <ol class="relative flex justify-between">
+              {
+                stops.map((stop, index) => (
+                  <li
+                    class:list={[
+                      "flex min-w-0 flex-col gap-2",
+                      index === 0
+                        ? "items-start text-left"
+                        : index === stops.length - 1
+                          ? "items-end text-right"
+                          : "items-center text-center",
+                    ]}
+                    style={`--step-delay: ${700 + index * 170}ms`}
+                  >
+                    <span
+                      class="route-stop block size-2.5 rounded-full bg-primary ring-3 ring-background"
+                    />
+                    <span class="figure text-xs text-muted-foreground">
+                      {stop.year}
+                    </span>
+                    <span class="text-sm">{stop.company}</span>
+                  </li>
+                ))
+              }
+            </ol>
+          </div>
+        </figure>
+
+        <div
+          class="hero-step mt-9 flex flex-col gap-3 sm:flex-row sm:items-center"
+          style="--step-delay: 540ms"
+        >
           <a
             href="#projects"
             class={buttonClass({ size: "lg", class: "rounded-full px-6" })}
@@ -77,7 +146,6 @@ const SOCIALS = [
             })}
           >
             Resume
-            <Icon name="arrow-up-right" class="size-4" />
           </a>
 
           <div class="flex items-center gap-1 sm:ml-2">
@@ -92,37 +160,43 @@ const SOCIALS = [
             >
               <Icon name="mail" class="size-[18px]" />
             </a>
-            {
-              SOCIALS.map((social) => (
-                <a
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={social.label}
-                  class={buttonClass({
-                    variant: "ghost",
-                    size: "icon",
-                    class: "size-10 rounded-full",
-                  })}
-                >
-                  {social.icon === "github" ? (
-                    <BrandGithub class="size-[18px]" />
-                  ) : (
-                    <BrandLinkedin class="size-[18px]" />
-                  )}
-                </a>
-              ))
-            }
+            <a
+              href={contact.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="GitHub"
+              class={buttonClass({
+                variant: "ghost",
+                size: "icon",
+                class: "size-10 rounded-full",
+              })}
+            >
+              <BrandGithub class="size-[18px]" />
+            </a>
+            <a
+              href={contact.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="LinkedIn"
+              class={buttonClass({
+                variant: "ghost",
+                size: "icon",
+                class: "size-10 rounded-full",
+              })}
+            >
+              <BrandLinkedin class="size-[18px]" />
+            </a>
           </div>
         </div>
       </div>
 
       {/* portrait — soft, unframed */}
       <div
-        class="order-first mx-auto w-full max-w-[14rem] sm:max-w-[16rem] lg:order-none lg:mx-0 lg:w-[20rem] lg:pt-1"
+        class="hero-step order-first mx-auto w-full max-w-[14rem] sm:max-w-[16rem] lg:order-none lg:mx-0 lg:w-[20rem] lg:pt-1"
+        style="--step-delay: 220ms"
       >
         <div
-          class="relative aspect-square overflow-hidden rounded-2xl bg-muted ring-1 ring-border lg:aspect-4/5"
+          class="raised relative aspect-square overflow-hidden rounded-2xl bg-muted ring-1 ring-border lg:aspect-4/5"
         >
           <Image
             src={photo}
