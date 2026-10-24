@@ -264,7 +264,6 @@ const canSend = contactAccessKey.length > 0;
   // to wire up and no handler that could pretend to send. Leaving the native
   // form action in place also means submission still works with JS disabled.
   if (form && form.dataset.ready !== undefined) {
-    const fallback = form.dataset.fallback ?? "";
     const status = form.querySelector<HTMLElement>("[data-form-status]");
     const submit = form.querySelector<HTMLButtonElement>("[data-submit]");
     const idleIcon = form.querySelector<HTMLElement>("[data-submit-idle]");
@@ -306,21 +305,20 @@ const canSend = contactAccessKey.length > 0;
       }
     };
 
-    form.addEventListener("submit", async (event) => {
-      event.preventDefault();
-
+    form.addEventListener("submit", (event) => {
       const data = new FormData(form);
 
-      // bots tick the honeypot — accept silently so they do not retry
+      // bots tick the honeypot — swallow the submit so they do not retry
       if (data.get("botcheck")) {
+        event.preventDefault();
         form.reset();
         setStatus("Thanks — message sent.", "ok");
         return;
       }
 
-      const name = String(data.get("name") ?? "").trim().slice(0, 100);
-      const email = String(data.get("email") ?? "").trim().slice(0, 200);
-      const message = String(data.get("message") ?? "").trim().slice(0, 5000);
+      const name = String(data.get("name") ?? "").trim();
+      const email = String(data.get("email") ?? "").trim();
+      const message = String(data.get("message") ?? "").trim();
 
       const errors: Partial<Record<Field, string>> = {};
       if (name.length < 2) errors.name = "Please enter your name.";
@@ -328,53 +326,25 @@ const canSend = contactAccessKey.length > 0;
       if (message.length < 10) errors.message = "Please write at least 10 characters.";
 
       showErrors(errors);
+
       if (Object.keys(errors).length > 0) {
+        event.preventDefault();
         setStatus("Please fix the highlighted fields.", "error");
         return;
       }
 
+      // Valid: let the browser submit the form natively.
+      //
+      // Deliberately NOT a fetch. Web3Forms answers the POST without an
+      // Access-Control-Allow-Origin header, so a scripted request can never
+      // read the reply — verified from the live origin. A native form POST
+      // is not subject to CORS at all, so it always gets through; Web3Forms
+      // then redirects back to ?sent=1 and the banner below reports success.
+      const subject = form.querySelector<HTMLInputElement>('input[name="subject"]');
+      if (subject) subject.value = `Portfolio enquiry from ${name}`;
+
       setBusy(true);
       setStatus("Sending…", "idle");
-
-      try {
-        // Sent as FormData on purpose. A JSON body sets a Content-Type that
-        // triggers a CORS preflight, and Web3Forms answers OPTIONS with 403
-        // and no Access-Control-Allow-Origin. FormData keeps this a "simple
-        // request", which is also exactly what the native form posts.
-        const payload = new FormData();
-        payload.set("access_key", String(data.get("access_key") ?? ""));
-        payload.set("subject", `Portfolio enquiry from ${name}`);
-        payload.set("from_name", String(data.get("from_name") ?? ""));
-        payload.set("name", name);
-        payload.set("email", email);
-        payload.set("message", message);
-
-        const response = await fetch(form.action, {
-          method: "POST",
-          headers: { Accept: "application/json" },
-          body: payload,
-        });
-
-        const result = (await response.json().catch(() => null)) as
-          | { success?: boolean; message?: string }
-          | null;
-
-        if (response.ok && result?.success) {
-          form.reset();
-          setStatus("Message sent — I'll get back to you soon.", "ok");
-          return;
-        }
-
-        throw new Error(result?.message ?? `Request failed (${response.status})`);
-      } catch (error) {
-        console.error("Contact form submission failed:", error);
-        setStatus(
-          `Couldn't send just now. Email me at ${fallback} instead.`,
-          "error",
-        );
-      } finally {
-        setBusy(false);
-      }
     });
   }
 
