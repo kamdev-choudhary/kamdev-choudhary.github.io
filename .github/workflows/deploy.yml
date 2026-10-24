@@ -23,7 +23,9 @@ jobs:
 
       - uses: actions/setup-node@v5
         with:
-          node-version: 22
+          # Astro 7 requires >=22.23.4, and plain "22" resolves to 22.23.3,
+          # which fails the build. Keep this at a major that clears the floor.
+          node-version: 24
           cache: npm
 
       - run: npm ci

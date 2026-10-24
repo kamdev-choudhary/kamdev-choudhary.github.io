@@ -5,7 +5,7 @@
 
 /** Canonical origin, no trailing slash. Astro fills `SITE` from `site` in astro.config.mjs. */
 export const siteUrl = (
-  import.meta.env.SITE ?? "https://kamdev-bharatai.github.io"
+  import.meta.env.SITE ?? "https://kamdev-choudhary.github.io"
 ).replace(/\/+$/, "");
 
 /**

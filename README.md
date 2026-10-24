@@ -50,7 +50,7 @@ One-time setup:
 
 1. **Settings → Pages → Source: GitHub Actions.**
 2. The site is configured as a **user site**, so the repository must be named
-   `kamdev-bharatai.github.io`. If you keep a different repository name, set
+   `kamdev-choudhary.github.io`. If you keep a different repository name, set
    `base` and `site` in `astro.config.mjs` to match the project-page URL.
 
 ## Editing content

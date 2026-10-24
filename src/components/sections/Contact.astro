@@ -6,7 +6,7 @@ import Icon from "@/components/Icon.astro";
 import BrandGithub from "@/components/icons/BrandGithub.astro";
 import BrandLinkedin from "@/components/icons/BrandLinkedin.astro";
 import { buttonClass } from "@/lib/button";
-import { CONTACT_ACTION, contactAccessKey } from "@/lib/site";
+import { CONTACT_ACTION, contactAccessKey, siteUrl } from "@/lib/site";
 import { contact, profile } from "@/data/profile";
 
 const FIELD_CLASS =
@@ -148,6 +148,8 @@ const canSend = contactAccessKey.length > 0;
         <input type="hidden" name="access_key" value={contactAccessKey} />
         <input type="hidden" name="subject" value="New enquiry from your portfolio" />
         <input type="hidden" name="from_name" value="Portfolio contact form" />
+        {/* only used when JavaScript is off and the form posts natively */}
+        <input type="hidden" name="redirect" value={`${siteUrl}/?sent=1#contact`} />
         {
           !canSend && (
             <div class="rounded-lg border border-dashed px-4 py-3">
@@ -335,20 +337,22 @@ const canSend = contactAccessKey.length > 0;
       setStatus("Sending…", "idle");
 
       try {
+        // Sent as FormData on purpose. A JSON body sets a Content-Type that
+        // triggers a CORS preflight, and Web3Forms answers OPTIONS with 403
+        // and no Access-Control-Allow-Origin. FormData keeps this a "simple
+        // request", which is also exactly what the native form posts.
+        const payload = new FormData();
+        payload.set("access_key", String(data.get("access_key") ?? ""));
+        payload.set("subject", `Portfolio enquiry from ${name}`);
+        payload.set("from_name", String(data.get("from_name") ?? ""));
+        payload.set("name", name);
+        payload.set("email", email);
+        payload.set("message", message);
+
         const response = await fetch(form.action, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify({
-            access_key: data.get("access_key"),
-            subject: `Portfolio enquiry from ${name}`,
-            from_name: data.get("from_name"),
-            name,
-            email,
-            message,
-          }),
+          headers: { Accept: "application/json" },
+          body: payload,
         });
 
         const result = (await response.json().catch(() => null)) as
@@ -372,6 +376,18 @@ const canSend = contactAccessKey.length > 0;
         setBusy(false);
       }
     });
+  }
+
+  /* The no-JS path posts natively and Web3Forms redirects back with ?sent=1. */
+  if (new URLSearchParams(window.location.search).has("sent")) {
+    const status = document.querySelector<HTMLElement>("[data-form-status]");
+    if (status) {
+      status.textContent = "Message sent — I'll get back to you soon.";
+      status.className = "min-w-0 text-sm text-primary";
+    }
+    const url = new URL(window.location.href);
+    url.searchParams.delete("sent");
+    history.replaceState(null, "", url.toString());
   }
 
   /* copy-to-clipboard on the email row */

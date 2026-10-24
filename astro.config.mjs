@@ -8,7 +8,7 @@ import tailwindcss from "@tailwindcss/vite";
  *
  * `site` is the canonical origin — it drives the sitemap, the canonical link
  * and the absolute URLs in the Open Graph tags and JSON-LD. The repo is
- * published as a user site (kamdev-bharatai.github.io), so `base` stays at
+ * published as a user site (kamdev-choudhary.github.io), so `base` stays at
  * the root and no asset path needs a prefix.
  *
  * There is no UI framework integration: every component is .astro and the
@@ -16,7 +16,7 @@ import tailwindcss from "@tailwindcss/vite";
  * framework runtime at all.
  */
 export default defineConfig({
-  site: "https://kamdev-bharatai.github.io",
+  site: "https://kamdev-choudhary.github.io",
   base: "/",
   output: "static",
   trailingSlash: "ignore",

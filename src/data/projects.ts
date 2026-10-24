@@ -185,6 +185,6 @@ export const projects: Project[] = [
     ],
     impact:
       "Replaced a server-rendered Next.js site with a static build that hosts for free and loads in a fraction of the payload.",
-    repo: "https://github.com/kamdev-bharatai/portfolio",
+    repo: "https://github.com/kamdev-choudhary/kamdev-choudhary.github.io",
   },
 ];
