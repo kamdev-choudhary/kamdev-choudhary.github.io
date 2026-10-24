@@ -73,15 +73,15 @@ const stops = [...experience].reverse().map((job) => ({
 
           <div class="relative">
             <svg
-              class="absolute inset-x-0 top-[5px] h-px w-full overflow-visible text-border"
+              class="absolute inset-x-0 top-[5px] h-px w-full overflow-visible text-primary"
               viewBox="0 0 100 1"
               preserveAspectRatio="none"
               aria-hidden="true"
             >
               <defs>
                 <linearGradient id="route-fade" x1="0" x2="1" y1="0" y2="0">
-                  <stop offset="0%" stop-color="currentColor" />
-                  <stop offset="72%" stop-color="currentColor" />
+                  <stop offset="0%" stop-color="currentColor" stop-opacity="0.55" />
+                  <stop offset="70%" stop-color="currentColor" stop-opacity="0.45" />
                   <stop offset="100%" stop-color="currentColor" stop-opacity="0" />
                 </linearGradient>
               </defs>
@@ -195,17 +195,24 @@ const stops = [...experience].reverse().map((job) => ({
         class="hero-step order-first mx-auto w-full max-w-[14rem] sm:max-w-[16rem] lg:order-none lg:mx-0 lg:w-[20rem] lg:pt-1"
         style="--step-delay: 220ms"
       >
-        <div
-          class="raised relative aspect-square overflow-hidden rounded-2xl bg-muted ring-1 ring-border lg:aspect-4/5"
-        >
-          <Image
-            src={photo}
-            alt={`Portrait of ${profile.name}`}
-            widths={[224, 256, 320, 640]}
-            sizes="(max-width: 640px) 14rem, (max-width: 1024px) 16rem, 20rem"
-            priority
-            class="absolute inset-0 size-full object-cover"
-          />
+        <div class="relative">
+          <div
+            class="pointer-events-none absolute -inset-10 rounded-full bg-primary/15 blur-3xl"
+            aria-hidden="true"
+          >
+          </div>
+          <div
+            class="raised relative aspect-square overflow-hidden rounded-2xl bg-muted ring-1 ring-border lg:aspect-4/5"
+          >
+            <Image
+              src={photo}
+              alt={`Portrait of ${profile.name}`}
+              widths={[224, 256, 320, 640]}
+              sizes="(max-width: 640px) 14rem, (max-width: 1024px) 16rem, 20rem"
+              priority
+              class="absolute inset-0 size-full object-cover"
+            />
+          </div>
         </div>
       </div>
     </div>
