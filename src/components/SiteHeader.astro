@@ -393,38 +393,51 @@ const POPUP_BASE =
     window.addEventListener("scroll", onScroll, { passive: true });
   }
 
-  /* ---------- active-section underline ---------- */
+  /* ---------- active-section underline ----------
+     Computed from scroll position rather than an IntersectionObserver: the
+     observer's band never contains the first section while the page is at the
+     top, which left a stale section marked active. */
   const navLinks = Array.from(
     document.querySelectorAll<HTMLAnchorElement>("[data-nav-link]"),
   );
-  const sectionIds = Array.from(document.querySelectorAll<HTMLElement>("section[id]")).map(
-    (section) => section.id,
-  );
+  const sectionIds = Array.from(
+    document.querySelectorAll<HTMLElement>("section[id]"),
+  ).map((section) => section.id);
 
   if (navLinks.length > 0 && sectionIds.length > 0) {
+    let activeId = "";
+
     const setActive = (id: string) => {
+      if (id === activeId) return;
+      activeId = id;
       for (const link of navLinks) {
         if (link.dataset.navLink === id) link.setAttribute("aria-current", "true");
         else link.removeAttribute("aria-current");
       }
     };
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort(
-            (a, b) => a.boundingClientRect.top - b.boundingClientRect.top,
-          );
-        if (visible[0]) setActive(visible[0].target.id);
-      },
-      { rootMargin: "-88px 0px -60% 0px", threshold: 0 },
-    );
+    const updateActive = () => {
+      const probe = window.scrollY + 120;
+      const atBottom =
+        window.innerHeight + window.scrollY >= document.body.scrollHeight - 2;
 
-    for (const id of sectionIds) {
-      const section = document.getElementById(id);
-      if (section) observer.observe(section);
-    }
+      let current = "";
+      for (const id of sectionIds) {
+        const section = document.getElementById(id);
+        if (!section) continue;
+        const top = section.getBoundingClientRect().top + window.scrollY;
+        if (top <= probe) current = id;
+      }
+
+      // the last section is often too short to ever reach the probe line
+      if (atBottom) current = sectionIds[sectionIds.length - 1];
+
+      setActive(current);
+    };
+
+    updateActive();
+    window.addEventListener("scroll", updateActive, { passive: true });
+    window.addEventListener("resize", updateActive, { passive: true });
   }
 
   /* ---------- command palette ---------- */

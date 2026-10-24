@@ -289,12 +289,13 @@
     animation-delay: var(--step-delay, 0ms);
   }
 
-  /* The route line traces the path between employers. `pathLength="1"` makes
-     the dash maths independent of the rendered geometry. */
+  /* The route line traces the path between employers. A scaled element rather
+     than an SVG dash: a horizontal <line> has a zero-height bounding box, which
+     makes an objectBoundingBox gradient degenerate and paint nothing. */
   .js .route-draw {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-    animation: route-trace 1.5s cubic-bezier(0.65, 0, 0.35, 1) 0.35s both;
+    transform: scaleX(0);
+    transform-origin: left center;
+    animation: route-trace 1.4s cubic-bezier(0.65, 0, 0.35, 1) 0.35s both;
   }
 
   .js .route-stop {
@@ -316,10 +317,10 @@
 
 @keyframes route-trace {
   from {
-    stroke-dashoffset: 1;
+    transform: scaleX(0);
   }
   to {
-    stroke-dashoffset: 0;
+    transform: scaleX(1);
   }
 }
 
