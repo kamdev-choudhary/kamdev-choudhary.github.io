@@ -4,8 +4,9 @@
  */
 
 /** Canonical origin, no trailing slash. Astro fills `SITE` from `site` in astro.config.mjs. */
-export const siteUrl = (import.meta.env.SITE ?? "https://kamdev-bharatai.github.io")
-  .replace(/\/+$/, "");
+export const siteUrl = (
+  import.meta.env.SITE ?? "https://kamdev-bharatai.github.io"
+).replace(/\/+$/, "");
 
 /**
  * Web3Forms access key. Submissions are relayed to the inbox the key is bound
@@ -18,9 +19,7 @@ export const siteUrl = (import.meta.env.SITE ?? "https://kamdev-bharatai.github.
  * Optional: with no key the contact form renders disabled and points visitors
  * at the email address instead, rather than offering a send that goes nowhere.
  */
-export const contactAccessKey: string =
-  import.meta.env.PUBLIC_WEB3FORMS_KEY ??
-  "7b7f85d2-251e-4f5d-bbbe-3239bb3447c7";
+export const contactAccessKey: string = "7b7f85d2-251e-4f5d-bbbe-3239bb3447c7";
 
 /** Web3Forms submission endpoint. */
 export const CONTACT_ACTION = "https://api.web3forms.com/submit";
