@@ -1,0 +1,17 @@
+---
+import Container from "@/components/Container.astro";
+import { cn } from "@/lib/utils";
+
+interface Props {
+  id: string;
+  class?: string | undefined;
+}
+
+const { id, class: className } = Astro.props;
+---
+
+<section id={id} class={cn("scroll-mt-22 py-13 sm:py-16 lg:py-20", className)}>
+  <Container class="reveal">
+    <slot />
+  </Container>
+</section>

@@ -1,0 +1,57 @@
+---
+import Section from "@/components/Section.astro";
+import SectionHeading from "@/components/SectionHeading.astro";
+import Panel from "@/components/Panel.astro";
+import Icon from "@/components/Icon.astro";
+import { computeStats, profile } from "@/data/profile";
+
+/** Icons keyed to the derived stats; the numbers come from data/stats.ts and
+ *  recalculate on their own at build time. */
+const ICONS: Record<string, string> = {
+  working: "rocket",
+  coding: "braces",
+  scholars: "users",
+  projects: "folder-git-2",
+  degree: "graduation-cap",
+};
+
+const stats = computeStats();
+---
+
+<Section id="about">
+  <SectionHeading
+    title="About"
+    description="Where the academic work ends and the engineering begins."
+  />
+
+  <div class="grid gap-6 lg:grid-cols-3 lg:items-start lg:gap-8">
+    <Panel class="lg:col-span-2" bodyClass="space-y-4 p-5 sm:p-6">
+      {
+        profile.about.map((para) => (
+          <p class="text-sm leading-relaxed text-muted-foreground text-pretty sm:text-base">
+            {para}
+          </p>
+        ))
+      }
+    </Panel>
+
+    <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-1">
+      {
+        stats.map((stat) => (
+          <div class="rounded-xl border bg-card p-4 transition-colors hover:border-primary/40">
+            <Icon
+              name={ICONS[stat.key] ?? "rocket"}
+              class="mb-2 size-4 text-primary"
+            />
+            <p class="text-xl font-semibold tracking-tight tabular-nums sm:text-2xl">
+              {stat.value}
+            </p>
+            <p class="mt-0.5 text-[11px] text-muted-foreground sm:text-xs">
+              {stat.label}
+            </p>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</Section>

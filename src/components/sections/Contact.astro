@@ -1,0 +1,360 @@
+---
+import Section from "@/components/Section.astro";
+import SectionHeading from "@/components/SectionHeading.astro";
+import Panel from "@/components/Panel.astro";
+import Icon from "@/components/Icon.astro";
+import BrandGithub from "@/components/icons/BrandGithub.astro";
+import BrandLinkedin from "@/components/icons/BrandLinkedin.astro";
+import { buttonClass } from "@/lib/button";
+import { contactEndpoint } from "@/lib/site";
+import { contact, profile } from "@/data/profile";
+
+const FIELD_CLASS =
+  "w-full rounded-[0.625rem] border border-input bg-background px-3.5 text-[0.9375rem] " +
+  "transition-colors outline-none placeholder:text-muted-foreground/70 " +
+  "focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-primary/15 " +
+  "aria-[invalid=true]:border-destructive";
+
+const LABEL_CLASS = "block text-[0.8125rem] font-medium text-foreground";
+const ERROR_CLASS = "mt-1.5 text-xs text-destructive";
+---
+
+<Section id="contact" class="border-t bg-muted/20">
+  <SectionHeading
+    title="Get in touch"
+    description="Open to full-stack roles, freelance builds and interesting problems. I read every message."
+  />
+
+  <div class="grid gap-6 lg:grid-cols-5 lg:items-start lg:gap-8">
+    {/* details */}
+    <div class="min-w-0 space-y-3 lg:col-span-2">
+      <div
+        class="flex min-w-0 items-center gap-3 rounded-xl border bg-card px-3.5 py-3 transition-colors hover:bg-accent"
+      >
+        <a
+          href={`mailto:${contact.email}`}
+          class="flex min-w-0 flex-1 items-center gap-3"
+        >
+          <span
+            class="flex size-9 shrink-0 items-center justify-center rounded-md border bg-muted/50"
+          >
+            <Icon name="mail" class="size-4 text-primary" />
+          </span>
+          <span class="min-w-0 flex-1">
+            <span class="block truncate text-[11px] text-muted-foreground">
+              Email
+            </span>
+            <span class="block truncate text-sm">{contact.email}</span>
+          </span>
+        </a>
+        <button
+          type="button"
+          data-copy-email
+          data-value={contact.email}
+          aria-label="Copy email address"
+          class={buttonClass({ variant: "ghost", size: "icon-sm", class: "shrink-0" })}
+        >
+          <Icon name="copy" class="size-3.5" data-copy-idle />
+          <Icon name="check" class="hidden size-3.5 text-primary" data-copy-done />
+        </button>
+      </div>
+
+      {
+        [
+          { label: "Phone", value: contact.phone, href: contact.phoneHref, icon: "phone" },
+          { label: "Location", value: profile.location, href: undefined, icon: "map-pin" },
+        ].map((row) => (
+          <div class="flex min-w-0 items-center gap-3 rounded-xl border bg-card px-3.5 py-3 transition-colors hover:bg-accent">
+            <Fragment>
+              {row.href ? (
+                <a href={row.href} class="flex min-w-0 flex-1 items-center gap-3">
+                  <span class="flex size-9 shrink-0 items-center justify-center rounded-md border bg-muted/50">
+                    <Icon name={row.icon} class="size-4 text-primary" />
+                  </span>
+                  <span class="min-w-0 flex-1">
+                    <span class="block truncate text-[11px] text-muted-foreground">
+                      {row.label}
+                    </span>
+                    <span class="block truncate text-sm">{row.value}</span>
+                  </span>
+                </a>
+              ) : (
+                <span class="flex min-w-0 flex-1 items-center gap-3">
+                  <span class="flex size-9 shrink-0 items-center justify-center rounded-md border bg-muted/50">
+                    <Icon name={row.icon} class="size-4 text-primary" />
+                  </span>
+                  <span class="min-w-0 flex-1">
+                    <span class="block truncate text-[11px] text-muted-foreground">
+                      {row.label}
+                    </span>
+                    <span class="block truncate text-sm">{row.value}</span>
+                  </span>
+                </span>
+              )}
+            </Fragment>
+          </div>
+        ))
+      }
+
+      <a
+        href={contact.github}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="flex min-w-0 items-center gap-3 rounded-xl border bg-card px-3.5 py-3 transition-colors hover:bg-accent"
+      >
+        <span class="flex size-9 shrink-0 items-center justify-center rounded-md border bg-muted/50">
+          <BrandGithub class="size-4 text-primary" />
+        </span>
+        <span class="min-w-0 flex-1">
+          <span class="block truncate text-[11px] text-muted-foreground">GitHub</span>
+          <span class="block truncate text-sm">{contact.githubLabel}</span>
+        </span>
+      </a>
+
+      <a
+        href={contact.linkedin}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="flex min-w-0 items-center gap-3 rounded-xl border bg-card px-3.5 py-3 transition-colors hover:bg-accent"
+      >
+        <span class="flex size-9 shrink-0 items-center justify-center rounded-md border bg-muted/50">
+          <BrandLinkedin class="size-4 text-primary" />
+        </span>
+        <span class="min-w-0 flex-1">
+          <span class="block truncate text-[11px] text-muted-foreground">LinkedIn</span>
+          <span class="block truncate text-sm">{contact.linkedinLabel}</span>
+        </span>
+      </a>
+    </div>
+
+    {/* form */}
+    <Panel class="lg:col-span-3 lg:self-start">
+      <form
+        data-contact-form
+        data-endpoint={contactEndpoint}
+        data-fallback={contact.email}
+        novalidate
+        class="space-y-5"
+      >
+        {/* honeypot — real users never see or fill this */}
+        <div aria-hidden="true" class="hidden">
+          <label for="website">Website</label>
+          <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" />
+        </div>
+
+        <div class="grid gap-5 sm:grid-cols-2">
+          <div>
+            <label for="name" class={LABEL_CLASS}>Name</label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              required
+              autocomplete="name"
+              placeholder="Ada Lovelace"
+              class={`mt-2 h-11 ${FIELD_CLASS}`}
+            />
+            <p data-error-for="name" class={`${ERROR_CLASS} hidden`}></p>
+          </div>
+          <div>
+            <label for="email" class={LABEL_CLASS}>Email</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              autocomplete="email"
+              placeholder="ada@example.com"
+              class={`mt-2 h-11 ${FIELD_CLASS}`}
+            />
+            <p data-error-for="email" class={`${ERROR_CLASS} hidden`}></p>
+          </div>
+        </div>
+
+        <div>
+          <label for="message" class={LABEL_CLASS}>Message</label>
+          <textarea
+            id="message"
+            name="message"
+            rows="6"
+            required
+            placeholder="Tell me about the role, project or idea…"
+            class={`mt-2 min-h-36 resize-y py-3 leading-relaxed ${FIELD_CLASS}`}></textarea>
+          <p data-error-for="message" class={`${ERROR_CLASS} hidden`}></p>
+        </div>
+
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <button
+            type="submit"
+            data-submit
+            class={buttonClass({ class: "h-11 w-full px-5 sm:w-auto" })}
+          >
+            <Icon name="send" class="size-4" data-submit-idle />
+            <Icon
+              name="loader-circle"
+              class="hidden size-4 animate-spin"
+              data-submit-busy
+            />
+            <span data-submit-label>Send message</span>
+          </button>
+
+          <p
+            data-form-status
+            role="status"
+            aria-live="polite"
+            class="min-w-0 text-sm text-muted-foreground"
+          >
+          </p>
+        </div>
+      </form>
+    </Panel>
+  </div>
+</Section>
+
+<script>
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  type Field = "name" | "email" | "message";
+
+  const form = document.querySelector<HTMLFormElement>("[data-contact-form]");
+  if (form) {
+    const endpoint = form.dataset.endpoint ?? "";
+    const fallback = form.dataset.fallback ?? "";
+    const status = form.querySelector<HTMLElement>("[data-form-status]");
+    const submit = form.querySelector<HTMLButtonElement>("[data-submit]");
+    const idleIcon = form.querySelector<HTMLElement>("[data-submit-idle]");
+    const busyIcon = form.querySelector<HTMLElement>("[data-submit-busy]");
+    const submitLabel = form.querySelector<HTMLElement>("[data-submit-label]");
+
+    const setStatus = (message: string, tone: "idle" | "ok" | "error") => {
+      if (!status) return;
+      status.textContent = message;
+      status.className = `min-w-0 text-sm ${
+        tone === "ok"
+          ? "text-primary"
+          : tone === "error"
+            ? "text-destructive"
+            : "text-muted-foreground"
+      }`;
+    };
+
+    const setBusy = (busy: boolean) => {
+      if (submit) submit.disabled = busy;
+      idleIcon?.classList.toggle("hidden", busy);
+      busyIcon?.classList.toggle("hidden", !busy);
+      if (submitLabel) submitLabel.textContent = busy ? "Sending…" : "Send message";
+    };
+
+    const showErrors = (errors: Partial<Record<Field, string>>) => {
+      for (const field of ["name", "email", "message"] as Field[]) {
+        const message = errors[field];
+        const target = form.querySelector<HTMLElement>(`[data-error-for="${field}"]`);
+        const input = form.elements.namedItem(field) as HTMLElement | null;
+        if (target) {
+          target.textContent = message ?? "";
+          target.classList.toggle("hidden", !message);
+        }
+        if (input) {
+          if (message) input.setAttribute("aria-invalid", "true");
+          else input.removeAttribute("aria-invalid");
+        }
+      }
+    };
+
+    /** Hands the visitor their mail client when direct send is unavailable. */
+    const openMailClient = (name: string, message: string) => {
+      const subject = encodeURIComponent(`Portfolio enquiry from ${name}`);
+      const body = encodeURIComponent(message);
+      window.location.href = `mailto:${fallback}?subject=${subject}&body=${body}`;
+    };
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const data = new FormData(form);
+
+      // bots fill the honeypot — accept silently so they do not retry
+      if (String(data.get("website") ?? "").trim()) {
+        form.reset();
+        setStatus("Thanks — message sent.", "ok");
+        return;
+      }
+
+      const name = String(data.get("name") ?? "").trim().slice(0, 100);
+      const email = String(data.get("email") ?? "").trim().slice(0, 200);
+      const message = String(data.get("message") ?? "").trim().slice(0, 5000);
+
+      const errors: Partial<Record<Field, string>> = {};
+      if (name.length < 2) errors.name = "Please enter your name.";
+      if (!EMAIL_RE.test(email)) errors.email = "Please enter a valid email.";
+      if (message.length < 10) errors.message = "Please write at least 10 characters.";
+
+      showErrors(errors);
+      if (Object.keys(errors).length > 0) {
+        setStatus("Please fix the highlighted fields.", "error");
+        return;
+      }
+
+      if (!endpoint) {
+        setStatus("Opening your email app…", "idle");
+        openMailClient(name, message);
+        return;
+      }
+
+      setBusy(true);
+      setStatus("Sending…", "idle");
+
+      try {
+        // text/plain keeps this a CORS "simple request", so the browser skips
+        // the preflight that Apps Script cannot answer. The body is still JSON
+        // and is parsed as such on the other end.
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ name, email, message }),
+        });
+
+        const result = (await response.json().catch(() => null)) as
+          | { ok?: boolean; error?: string }
+          | null;
+
+        if (response.ok && result?.ok) {
+          form.reset();
+          setStatus("Message sent — I'll get back to you soon.", "ok");
+          return;
+        }
+
+        throw new Error(result?.error ?? `Request failed (${response.status})`);
+      } catch (error) {
+        console.error("Contact form submission failed:", error);
+        setStatus(
+          `Couldn't send directly. Email me at ${fallback} instead.`,
+          "error",
+        );
+      } finally {
+        setBusy(false);
+      }
+    });
+  }
+
+  /* copy-to-clipboard on the email row */
+  const copyButton = document.querySelector<HTMLButtonElement>("[data-copy-email]");
+  if (copyButton) {
+    const idle = copyButton.querySelector<HTMLElement>("[data-copy-idle]");
+    const done = copyButton.querySelector<HTMLElement>("[data-copy-done]");
+
+    copyButton.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(copyButton.dataset.value ?? "");
+        idle?.classList.add("hidden");
+        done?.classList.remove("hidden");
+        window.setTimeout(() => {
+          idle?.classList.remove("hidden");
+          done?.classList.add("hidden");
+        }, 2000);
+      } catch {
+        /* clipboard blocked — the address is selectable in the link beside it */
+      }
+    });
+  }
+</script>

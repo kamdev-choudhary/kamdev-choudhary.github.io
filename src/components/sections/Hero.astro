@@ -1,0 +1,139 @@
+---
+import { Image } from "astro:assets";
+import Container from "@/components/Container.astro";
+import Icon from "@/components/Icon.astro";
+import BrandGithub from "@/components/icons/BrandGithub.astro";
+import BrandLinkedin from "@/components/icons/BrandLinkedin.astro";
+import photo from "@/assets/photo.jpg";
+import { buttonClass } from "@/lib/button";
+import { contact, experience, profile } from "@/data/profile";
+
+/** Typography-led: name -> what I do -> where I do it. Nothing else competes. */
+const current = experience[0];
+
+const SOCIALS = [
+  { href: contact.github, label: "GitHub", icon: "github" },
+  { href: contact.linkedin, label: "LinkedIn", icon: "linkedin" },
+] as const;
+---
+
+<section class="border-b">
+  <Container class="py-14 sm:py-20 lg:py-24">
+    <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-16">
+      <div class="min-w-0 max-w-2xl">
+        {
+          profile.available && (
+            <p class="flex items-center gap-2.5 text-sm text-muted-foreground">
+              <span class="relative flex size-1.5">
+                <span class="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-70" />
+                <span class="relative inline-flex size-1.5 rounded-full bg-primary" />
+              </span>
+              Open to opportunities
+            </p>
+          )
+        }
+
+        <h1
+          class="mt-6 text-[2.75rem] leading-[1.03] font-semibold tracking-[-0.03em] text-balance sm:text-6xl lg:text-7xl"
+        >
+          {profile.name}
+        </h1>
+
+        <p class="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground text-pretty sm:text-xl">
+          {profile.title} at <span class="text-foreground">{current.company}</span>,
+          building AI-powered web and mobile products — with a background in
+          education technology.
+        </p>
+
+        <dl class="mt-9 grid grid-cols-2 gap-x-8 gap-y-5 border-t pt-7 sm:max-w-md">
+          <div>
+            <dt class="text-xs tracking-wide text-muted-foreground uppercase">
+              Based in
+            </dt>
+            <dd class="mt-1 text-sm">{profile.location}</dd>
+          </div>
+          <div>
+            <dt class="text-xs tracking-wide text-muted-foreground uppercase">
+              Focus
+            </dt>
+            <dd class="mt-1 text-sm">Full-stack · AI · Mobile</dd>
+          </div>
+        </dl>
+
+        <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <a
+            href="#projects"
+            class={buttonClass({ size: "lg", class: "rounded-full px-6" })}
+          >
+            View work
+            <Icon name="arrow-down" class="size-4" />
+          </a>
+          <a
+            href="/resume"
+            class={buttonClass({
+              variant: "outline",
+              size: "lg",
+              class: "rounded-full px-6",
+            })}
+          >
+            Resume
+            <Icon name="arrow-up-right" class="size-4" />
+          </a>
+
+          <div class="flex items-center gap-1 sm:ml-2">
+            <a
+              href={`mailto:${contact.email}`}
+              aria-label="Email"
+              class={buttonClass({
+                variant: "ghost",
+                size: "icon",
+                class: "size-10 rounded-full",
+              })}
+            >
+              <Icon name="mail" class="size-[18px]" />
+            </a>
+            {
+              SOCIALS.map((social) => (
+                <a
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={social.label}
+                  class={buttonClass({
+                    variant: "ghost",
+                    size: "icon",
+                    class: "size-10 rounded-full",
+                  })}
+                >
+                  {social.icon === "github" ? (
+                    <BrandGithub class="size-[18px]" />
+                  ) : (
+                    <BrandLinkedin class="size-[18px]" />
+                  )}
+                </a>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+
+      {/* portrait — soft, unframed */}
+      <div
+        class="order-first mx-auto w-full max-w-[14rem] sm:max-w-[16rem] lg:order-none lg:mx-0 lg:w-[20rem] lg:pt-1"
+      >
+        <div
+          class="relative aspect-square overflow-hidden rounded-2xl bg-muted ring-1 ring-border lg:aspect-4/5"
+        >
+          <Image
+            src={photo}
+            alt={`Portrait of ${profile.name}`}
+            widths={[224, 256, 320, 640]}
+            sizes="(max-width: 640px) 14rem, (max-width: 1024px) 16rem, 20rem"
+            priority
+            class="absolute inset-0 size-full object-cover"
+          />
+        </div>
+      </div>
+    </div>
+  </Container>
+</section>

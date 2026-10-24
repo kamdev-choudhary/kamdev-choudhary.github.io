@@ -1,0 +1,182 @@
+---
+import { Image } from "astro:assets";
+import Section from "@/components/Section.astro";
+import SectionHeading from "@/components/SectionHeading.astro";
+import Badge from "@/components/Badge.astro";
+import TechBadge from "@/components/TechBadge.astro";
+import Icon from "@/components/Icon.astro";
+import BrandGithub from "@/components/icons/BrandGithub.astro";
+import { buttonClass } from "@/lib/button";
+import { projects } from "@/data/profile";
+
+/** Keeps the badge row to a single line on most widths. */
+const MAX_BADGES = 5;
+---
+
+<Section id="projects" class="border-t">
+  <SectionHeading
+    title="Projects"
+    description="Things I have designed, built and shipped."
+  />
+
+  <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+    {
+      projects.map((project) => {
+        const extra = project.tech.length - MAX_BADGES;
+        const details = [
+          { title: "what I built", items: project.highlights },
+          { title: "challenges", items: project.challenges },
+        ].filter((group) => group.items.length > 0);
+
+        return (
+          <article class="group flex flex-col overflow-hidden rounded-xl border bg-card transition-colors hover:border-primary/40 print-break">
+            {project.image && (
+              <div class="relative aspect-16/9 w-full overflow-hidden bg-muted">
+                <Image
+                  src={project.image}
+                  alt=""
+                  widths={[320, 480, 768]}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                  position="center top"
+                  class="absolute inset-0 size-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
+                />
+                {/* scrim keeps the overlaid text legible on any screenshot */}
+                <div
+                  aria-hidden="true"
+                  class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent"
+                />
+                <div class="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-3.5">
+                  <div class="min-w-0">
+                    <h3 class="truncate text-base font-semibold tracking-tight text-white">
+                      {project.name}
+                    </h3>
+                    <p class="truncate text-xs text-white/70">{project.role}</p>
+                  </div>
+                  <span class="shrink-0 rounded-full border border-white/20 bg-white/15 px-2.5 py-0.5 text-[10px] text-white backdrop-blur-sm">
+                    {project.completed}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <div class="flex flex-1 flex-col p-4">
+              {/* projects without a screenshot keep their heading inline */}
+              {!project.image && (
+                <div class="mb-3">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-base font-semibold tracking-tight text-balance">
+                      {project.name}
+                    </h3>
+                    <Badge variant="outline">{project.completed}</Badge>
+                  </div>
+                  <p class="mt-0.5 text-xs text-primary">{project.role}</p>
+                </div>
+              )}
+
+              <p class="line-clamp-3 text-sm leading-relaxed text-muted-foreground text-pretty">
+                {project.blurb}
+              </p>
+
+              <ul class="mt-3 flex flex-wrap gap-1.5">
+                {project.tech.slice(0, MAX_BADGES).map((tech) => (
+                  <li>
+                    <TechBadge name={tech} />
+                  </li>
+                ))}
+                {extra > 0 && (
+                  <li>
+                    <Badge variant="outline">+{extra}</Badge>
+                  </li>
+                )}
+              </ul>
+
+              {/* native disclosure — no JS, keyboard accessible, searchable */}
+              <details class="group/details mt-2">
+                <summary
+                  class="flex cursor-pointer list-none items-center gap-1.5 py-2 text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
+                >
+                  <Icon
+                    name="arrow-right"
+                    class="size-3.5 transition-transform group-open/details:rotate-90"
+                  />
+                  Details
+                </summary>
+
+                <div class="space-y-4 pt-1 pb-2">
+                  {details.map((group) => (
+                    <div>
+                      <p class="mb-1.5 text-[11px] tracking-wide text-primary uppercase">
+                        {group.title}
+                      </p>
+                      <ul class="space-y-1.5">
+                        {group.items.map((item) => (
+                          <li class="flex gap-2 text-sm leading-relaxed text-muted-foreground text-pretty">
+                            <span class="text-primary/60" aria-hidden="true">
+                              &rsaquo;
+                            </span>
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+
+                  <div>
+                    <p class="mb-1.5 text-[11px] tracking-wide text-primary uppercase">
+                      impact
+                    </p>
+                    <p class="text-sm leading-relaxed text-muted-foreground text-pretty">
+                      {project.impact}
+                    </p>
+                  </div>
+
+                  {project.collaborators?.length && (
+                    <div>
+                      <p class="mb-1.5 text-[11px] tracking-wide text-primary uppercase">
+                        collaborators
+                      </p>
+                      {project.collaborators.map((person) => (
+                        <p class="flex items-center gap-1.5 text-sm text-muted-foreground">
+                          <Icon name="users" class="size-3.5 shrink-0" />
+                          {person.name} — {person.role}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </details>
+
+              <div class="mt-auto flex flex-wrap gap-2 border-t pt-3">
+                {project.live && (
+                  <a
+                    href={project.live}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class={buttonClass({ size: "sm" })}
+                  >
+                    <Icon name="external-link" class="size-3.5" />
+                    Live site
+                  </a>
+                )}
+                {project.repo && (
+                  <a
+                    href={project.repo}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class={buttonClass({ variant: "outline", size: "sm" })}
+                  >
+                    <BrandGithub class="size-3.5" />
+                    Source
+                  </a>
+                )}
+                {!project.live && !project.repo && (
+                  <span class="text-xs text-muted-foreground">Private work</span>
+                )}
+              </div>
+            </div>
+          </article>
+        );
+      })
+    }
+  </div>
+</Section>

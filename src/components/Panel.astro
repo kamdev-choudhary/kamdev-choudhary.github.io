@@ -1,0 +1,16 @@
+---
+import { cn } from "@/lib/utils";
+
+interface Props {
+  class?: string | undefined;
+  bodyClass?: string | undefined;
+}
+
+const { class: className, bodyClass } = Astro.props;
+---
+
+<div class={cn("overflow-hidden rounded-xl border bg-card print-plain", className)}>
+  <div class={cn("p-5 sm:p-6", bodyClass)}>
+    <slot />
+  </div>
+</div>

@@ -1,0 +1,87 @@
+---
+import Section from "@/components/Section.astro";
+import SectionHeading from "@/components/SectionHeading.astro";
+import Badge from "@/components/Badge.astro";
+import Icon from "@/components/Icon.astro";
+import { extracurricular, hobbies } from "@/data/profile";
+
+/** Lucide ships no brand marks, so Chess uses the rook (`castle`). */
+const HOBBY_ICONS: Record<string, string> = {
+  Chess: "castle",
+  Music: "music",
+  Coding: "terminal",
+  Puzzles: "puzzle",
+  Workout: "dumbbell",
+};
+---
+
+<Section id="community" class="border-t">
+  <SectionHeading
+    title="Community & Interests"
+    description="Volunteering that shaped how I work, and what I do when I'm not at a keyboard."
+  />
+
+  <div class="grid gap-6 lg:grid-cols-3 lg:items-start lg:gap-8">
+    {/* volunteering */}
+    <div class="space-y-5 lg:col-span-2">
+      {
+        extracurricular.map((entry) => (
+          <article class="rounded-xl border bg-card p-5 transition-colors hover:border-primary/40 print-break sm:p-6">
+            <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+              <h3 class="flex items-center gap-2.5 text-base font-semibold tracking-tight text-balance sm:text-lg">
+                <span class="flex size-8 shrink-0 items-center justify-center rounded-md border bg-muted/50">
+                  <Icon name="heart-handshake" class="size-4 text-primary" />
+                </span>
+                {entry.name}
+              </h3>
+              <Badge variant="outline" class="w-fit">
+                {entry.period}
+              </Badge>
+            </div>
+
+            <p class="mt-3 text-sm leading-relaxed text-muted-foreground text-pretty">
+              {entry.description}
+            </p>
+
+            <ul class="mt-4 space-y-2">
+              {entry.achievements.map((achievement) => (
+                <li class="flex gap-2.5 text-sm leading-relaxed text-muted-foreground text-pretty">
+                  <span
+                    class="mt-[0.4em] size-1.5 shrink-0 rotate-45 bg-primary/60"
+                    aria-hidden="true"
+                  />
+                  {achievement}
+                </li>
+              ))}
+            </ul>
+          </article>
+        ))
+      }
+    </div>
+
+    {/* hobbies */}
+    <div class="rounded-xl border bg-card p-5 sm:p-6 lg:sticky lg:top-24 lg:self-start">
+      <p class="text-sm font-semibold">Hobbies</p>
+      <ul class="mt-4 space-y-4">
+        {
+          hobbies.map((hobby) => (
+            <li class="flex gap-3">
+              <span class="flex size-8 shrink-0 items-center justify-center rounded-md border bg-muted/50">
+                <Icon
+                  name={HOBBY_ICONS[hobby.name] ?? "terminal"}
+                  class="size-4 text-primary"
+                />
+              </span>
+              <div class="min-w-0">
+                <p class="text-sm font-medium">{hobby.name}</p>
+                <p class="text-xs text-muted-foreground text-pretty">
+                  {hobby.note}
+                </p>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</Section>

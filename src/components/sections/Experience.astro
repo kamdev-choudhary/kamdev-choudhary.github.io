@@ -1,0 +1,57 @@
+---
+import Section from "@/components/Section.astro";
+import SectionHeading from "@/components/SectionHeading.astro";
+import Badge from "@/components/Badge.astro";
+import { experience } from "@/data/profile";
+
+/** A quiet two-column list: hairlines, no cards, no timeline dots. */
+const positions = experience.flatMap((job) =>
+  job.positions.map((position) => ({ company: job.company, position })),
+);
+---
+
+<Section id="experience" class="border-t">
+  <SectionHeading title="Experience" description="Roles, most recent first." />
+
+  <div class="divide-y border-t">
+    {
+      positions.map(({ company, position }) => (
+        <article class="grid gap-4 py-8 sm:grid-cols-[11rem_minmax(0,1fr)] sm:gap-10 lg:grid-cols-[13rem_minmax(0,1fr)]">
+          <div class="sm:pt-0.5">
+            <p class="text-sm text-muted-foreground tabular-nums">
+              {position.start} — {position.end}
+            </p>
+            {position.current && (
+              <Badge variant="secondary" class="mt-2">
+                Current
+              </Badge>
+            )}
+          </div>
+
+          <div class="min-w-0">
+            <h3 class="text-lg font-semibold tracking-tight">{position.role}</h3>
+            <p class="mt-0.5 text-sm text-muted-foreground">
+              {company} · {position.location}
+            </p>
+
+            <ul class="mt-4 space-y-2.5">
+              {position.highlights.map((highlight) => (
+                <li class="relative pl-5 text-sm leading-relaxed text-muted-foreground text-pretty before:absolute before:top-[0.6em] before:left-0 before:size-1 before:rounded-full before:bg-muted-foreground/50">
+                  {highlight}
+                </li>
+              ))}
+            </ul>
+
+            <ul class="mt-5 flex flex-wrap gap-1.5">
+              {position.skills.map((skill) => (
+                <li>
+                  <Badge variant="outline">{skill}</Badge>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </article>
+      ))
+    }
+  </div>
+</Section>
